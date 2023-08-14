@@ -3,7 +3,6 @@ const request = require('request');
 
 const port = 5000
 
-
 var spotify_client_id = '126c29da06cd4915b5332548f4bf1cfa'
 var spotify_client_secret = '17862fec2b74482eaf7a1ba33ba4cf56'
 

@@ -1,12 +1,13 @@
 const express = require('express')
-const dotenv = require('dotenv');
+const request = require('request');
 
 const port = 5000
 
-dotenv.config()
 
-var spotify_client_id = process.env.SPOTIFY_CLIENT_ID
-var spotify_client_secret = process.env.SPOTIFY_CLIENT_SECRET
+var spotify_client_id = '126c29da06cd4915b5332548f4bf1cfa'
+var spotify_client_secret = '17862fec2b74482eaf7a1ba33ba4cf56'
+
+var spotify_redirect_uri = 'http://localhost:3000/auth/callback'
 
 var generateRandomString = function (length) {
   var text = '';
@@ -21,17 +22,15 @@ var generateRandomString = function (length) {
 var app = express();
 
 app.get('/auth/login', (req, res) => {
-  var scope = "streaming \
-               user-read-email \
-               user-read-private"
 
+  var scope = "streaming user-read-email user-read-private"
   var state = generateRandomString(16);
 
   var auth_query_parameters = new URLSearchParams({
     response_type: "code",
     client_id: spotify_client_id,
     scope: scope,
-    redirect_uri: "http://localhost:3000/auth/callback",
+    redirect_uri: spotify_redirect_uri,
     state: state
   })
 
@@ -46,7 +45,7 @@ app.get('/auth/callback', (req, res) => {
     url: 'https://accounts.spotify.com/api/token',
     form: {
       code: code,
-      redirect_uri: "http://localhost:3000/auth/callback",
+      redirect_uri: spotify_redirect_uri,
       grant_type: 'authorization_code'
     },
     headers: {
@@ -58,21 +57,17 @@ app.get('/auth/callback', (req, res) => {
 
   request.post(authOptions, function(error, response, body) {
     if (!error && response.statusCode === 200) {
-      var access_token = body.access_token;
+      access_token = body.access_token;
       res.redirect('/')
     }
   });
+
 })
 
+app.get('/auth/token', (req, res) => {
+  res.json({ access_token: access_token})
+})
 
 app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}`)
 })
-
-app.get('/auth/token', (req, res) => {
-  res.json(
-     {
-        access_token: access_token
-     })
-})
-

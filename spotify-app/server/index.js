@@ -48,11 +48,11 @@ app.get('/auth/getPlaylistInfo/:id', (req, res) => {
        },
     },
     (error, response, body) => {
-       if (!error && response.statusCode === 200) {
+       if (!error && response.statusCode === 200 ) {
           const playlistInfo = JSON.parse(body);
           res.json(playlistInfo);
        } else {
-          res.status(response.statusCode).json({ error: 'Failed to fetch playlist info' });
+          res.status(response.statusCode).json({ error: 'Invalid playlist id' });
        }
     }
  );

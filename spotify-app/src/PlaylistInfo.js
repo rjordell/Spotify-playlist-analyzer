@@ -9,7 +9,7 @@ function PlaylistInfo() {
                     <input
                         name = "mybutton"
                         placeholder="Enter Playlist ID"
-                        value={inputValue}
+                        //value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
                     />
 
@@ -21,5 +21,6 @@ function PlaylistInfo() {
         </div>
     );
 }
+
 export default PlaylistInfo;
 

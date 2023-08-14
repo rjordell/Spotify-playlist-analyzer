@@ -36,6 +36,28 @@ app.get('/auth/login', (req, res) => {
   res.redirect('https://accounts.spotify.com/authorize/?' + auth_query_parameters.toString());
 })
 
+app.get('/auth/getPlaylistInfo/:id', (req, res) => {
+
+  const playlistId = req.params.id;
+
+  request.get(
+    `https://api.spotify.com/v1/playlists/${playlistId}`,
+    {
+       headers: {
+          Authorization: `Bearer ${access_token}`,
+       },
+    },
+    (error, response, body) => {
+       if (!error && response.statusCode === 200) {
+          const playlistInfo = JSON.parse(body);
+          res.json(playlistInfo);
+       } else {
+          res.status(response.statusCode).json({ error: 'Failed to fetch playlist info' });
+       }
+    }
+ );
+})
+
 app.get('/auth/callback', (req, res) => {
 
   var code = req.query.code;

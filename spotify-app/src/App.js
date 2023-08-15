@@ -20,11 +20,22 @@ function App() {
 
   }, []);
 
-  return (
-    <>
-        { (token === '') ? <Login/> : <PlaylistInfo/> }
-    </>
-  );
+  if(token === ''){
+      return (<Login/>);
+  }
+  else{
+    return(
+      <div>
+        <div>
+          <PlaylistInfo/>
+        </div>
+        <div>
+          <WebPlayback token={token}/>
+        </div>
+      </div>
+    );
+  }
+
 }
 
 

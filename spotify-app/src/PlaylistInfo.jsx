@@ -4,8 +4,8 @@ import {useState} from 'react';
 function PlaylistInfo() {
     const [inputValue, setInputValue] = useState('');
     return (
-        <div className="App">
-            <header className="App-header">
+        <div className="container">
+            <div className="main-wrapper">
                     <input
                         name = "mybutton"
                         placeholder="Enter Playlist ID"
@@ -17,7 +17,7 @@ function PlaylistInfo() {
                 <a className="btn-spotify" href={"/auth/getPlaylistInfo/" + inputValue} >
                     Get playlist info
                 </a>
-            </header>
+            </div>
         </div>
     );
 }

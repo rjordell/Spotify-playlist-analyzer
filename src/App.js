@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import WebPlayback from './WebPlayback'
-import Login from './Login'
-import PlaylistInfo from './PlaylistInfo'
-import './App.css';
+import WebPlayback from './components/player/WebPlayback'
+import Login from './components/Login'
+import PlaylistInfo from './components/PlaylistInfo'
+import TrackInfo from './components/TrackInfo'
+import './styles/App.css';
 
 function App() {
 
@@ -27,7 +28,7 @@ function App() {
     return(
       <div className="App">
         <div>
-          <PlaylistInfo/>
+          <TrackInfo/>
         </div>
         <div>
           {//<WebPlayback token={token}/> 

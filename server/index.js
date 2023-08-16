@@ -63,6 +63,49 @@ app.get('/auth/getPlaylistinfo/:id', (req, res) => {
  );
 })
 
+app.get('/auth/getTrackinfo/:id', (req, res) => {
+
+  const trackId = req.params.id;
+
+  request.get(
+    `https://api.spotify.com/v1/tracks/${trackId}`,
+    {
+       headers: {
+          Authorization: `Bearer ${access_token}`,
+       },
+    },
+    (error, response, body) => {
+       if (!error && response.statusCode === 200 ) {
+          const trackInfo = JSON.parse(body);
+          res.json(trackInfo);
+       } else {
+          res.status(response.statusCode).json({ error: "Invalid track id" });
+       }
+    }
+ );
+})
+
+app.get('/auth/getArtistInfo/:id', (req, res) => {
+
+  const artistId = req.params.id;
+
+  request.get(
+    `https://api.spotify.com/v1/artists/${artistId}`,
+    {
+       headers: {
+          Authorization: `Bearer ${access_token}`,
+       },
+    },
+    (error, response, body) => {
+       if (!error && response.statusCode === 200 ) {
+          const artistInfo = JSON.parse(body);
+          res.json(artistInfo);
+       } else {
+          res.status(response.statusCode).json({ error: "Invalid artist id" });
+       }
+    }
+ );
+})
 
 app.get('/auth/callback', (req, res) => {
 

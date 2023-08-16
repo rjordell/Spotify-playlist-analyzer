@@ -19,7 +19,7 @@ function PlaylistInfo() {
             //setPlaylist(data);
             console.log(data);
         } catch (error) {
-            console.log('Error retrieving playlist info:', error);
+            console.error('Error retrieving playlist info:', error);
             setPlaylist(null); // Clear playlist in case of error
         }
     }
@@ -38,7 +38,6 @@ function PlaylistInfo() {
                 <button className="btn-spotify" onClick={() => getPlaylistinfo(inputValue)}>
                     Get playlist info
                 </button>
-                <br></br>
                 {
                 
                 playlist !== null ? (
@@ -49,7 +48,7 @@ function PlaylistInfo() {
                         Followers: {playlist.followers.total}
                     </>
                 ) : (
-                    <></>
+                    <>Input a valid playlist ID!</>
                 )
                 
                 }

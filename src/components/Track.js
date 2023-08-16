@@ -2,36 +2,38 @@ import React from 'react';
 import {useState, useEffect} from 'react';
 
 function Track(props) {
-    const [inputValue, setInputValue] = useState('');
     const [track, setTrack] = useState(null);
     const [artist, setArtist] = useState(null);
     
-    const getArtistInfo = async (id) => {
-        const response = await fetch('/auth/getArtistInfo/' + id);
-        const data = await response.json();
-        setArtist(data);
-        console.log(data);
-    }
-
-    const getTrackInfo = async (id) => {
-        try {
-            const response = await fetch('/auth/getTrackInfo/' + id);
+    useEffect(() => {
+        const getArtistInfo = async (id) => {
+            const response = await fetch('/auth/getArtistInfo/' + id);
             const data = await response.json();
-            if(data.error){
-                setTrack(null);
-            }else{
-                setTrack(data);
-                getArtistInfo(data.artists[0].id)
-            }
+            setArtist(data);
             console.log(data);
-        } catch (error) {
-            console.error('Error retrieving track info:', error);
-            setTrack(null); // Clear track in case of error
-            setArtist(null); // Reset artist state in case of error
         }
-    }
 
-    getTrackInfo(props.id)
+        const getTrackInfo = async (id) => {
+            try {
+                const response = await fetch('/auth/getTrackInfo/' + id);
+                const data = await response.json();
+                if (data.error) {
+                    setTrack(null);
+                } else {
+                    setTrack(data);
+                    getArtistInfo(data.artists[0].id);
+                }
+                console.log(data);
+            } catch (error) {
+                console.error('Error retrieving track info:', error);
+                setTrack(null);
+                setArtist(null);
+            }
+        }
+
+        getTrackInfo(props.id);
+    }, [props.id]);
+
     return (
         <>
                 {

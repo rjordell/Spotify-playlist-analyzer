@@ -9,7 +9,7 @@ html, body {
 }
 
 body {
-  background-color: #333;
+  background-color: #080808;
   color: #eee;
   font-family: Helvetica, Arial;
   font-size: 3vmin;
@@ -59,29 +59,33 @@ body {
 }
 
 .main-wrapper2 {
-  padding-top: 45px;
+  padding: 0.5em;
   align-items: center;
   display: flex;
   height: 100%;
-  margin: 0 0;
+  margin: 0.5em;
+  margin-bottom: 0;
   justify-content: left;
   position: static;
-  width: 100%;
+  width: 95%;
   z-index: 1;
   text-align: left;
   flex-direction: column;
+  background-color: #333;
 }
 .main-wrapper3 {
-  padding-top: 45px;
+  padding: 0.5em;
   align-items: center;
   display: flex;
   height: 100%;
-  margin: 0 0;
+  margin: 0.5em;
+  margin-bottom: 0;
   justify-content: left;
   position: static;
-  width: 100%;
+  width: 95%;
   z-index: 1;
   text-align: left;
+  background-color: #333;
 }
 
 .container {
@@ -114,8 +118,8 @@ body {
   float: left;
   margin-right: 10px;
   text-align: right;
-  width: 300px;
-  height: 300px;
+  width: 200px;
+  height: 200px;
 }
 
 .now-playing__side {

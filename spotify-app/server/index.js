@@ -36,7 +36,7 @@ app.get('/auth/login', (req, res) => {
   res.redirect('https://accounts.spotify.com/authorize/?' + auth_query_parameters.toString());
 })
 
-app.get('/auth/getPlaylistInfo/:id', (req, res) => {
+app.get('/auth/getPlaylistinfo/:id', (req, res) => {
 
   const playlistId = req.params.id;
 
@@ -52,11 +52,12 @@ app.get('/auth/getPlaylistInfo/:id', (req, res) => {
           const playlistInfo = JSON.parse(body);
           res.json(playlistInfo);
        } else {
-          res.status(response.statusCode).json({ error: 'Invalid playlist id' });
+          res.status(response.statusCode).json({ error: "Invalid playlist id" });
        }
     }
  );
 })
+
 
 app.get('/auth/callback', (req, res) => {
 

@@ -1,10 +1,15 @@
 const express = require('express')
 const request = require('request');
+const dotenv = require('dotenv') 
 
 const port = 5000
 
-var spotify_client_id = '126c29da06cd4915b5332548f4bf1cfa'
-var spotify_client_secret = '17862fec2b74482eaf7a1ba33ba4cf56'
+global.access_token = ''
+
+dotenv.config({path:'test.env'})
+
+var spotify_client_id = process.env.SPOTIFY_CLIENT_ID
+var spotify_client_secret = process.env.SPOTIFY_CLIENT_SECRET
 
 var spotify_redirect_uri = 'http://localhost:3000/auth/callback'
 

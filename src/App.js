@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import WebPlayback from './WebPlayback'
 import Login from './Login'
+import PlaylistInfo from './PlaylistInfo'
 import './App.css';
 
 function App() {
@@ -19,11 +20,23 @@ function App() {
 
   }, []);
 
-  return (
-    <>
-        { (token === '') ? <Login/> : <WebPlayback token={token} /> }
-    </>
-  );
+  if(token === ''){
+      return (<Login/>);
+  }
+  else{
+    return(
+      <div className="App">
+        <div>
+          <PlaylistInfo/>
+        </div>
+        <div>
+          {//<WebPlayback token={token}/> 
+          }
+        </div>
+      </div>
+    );
+  }
+
 }
 
 

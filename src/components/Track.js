@@ -31,10 +31,9 @@ function Track(props) {
         }
     }
 
-    getTrackInfo(props.Id)
+    getTrackInfo(props.id)
     return (
-        <div className="container">
-            <div className="main-wrapper">
+        <>
                 {
                 track !== null ? (
                     <>
@@ -58,9 +57,7 @@ function Track(props) {
                 )
                 
                 }
-
-            </div>
-        </div>
+        </>
     );
 }
 

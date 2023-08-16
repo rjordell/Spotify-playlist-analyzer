@@ -1,6 +1,6 @@
 import React from 'react';
 import {useState, useEffect} from 'react';
-import Track from './components/Track';
+import Track from './Track';
 
 function PlaylistInfo() {
     const [inputValue, setInputValue] = useState('');
@@ -27,7 +27,7 @@ function PlaylistInfo() {
 
     return (
         <div className="container">
-            <div className="main-wrapper">
+            <div className="main-wrapper2">
                     <input
                         name = "mybutton"
                         placeholder="Enter Playlist ID"
@@ -47,16 +47,20 @@ function PlaylistInfo() {
                         {playlist.name}
                         <br />
                         Followers: {playlist.followers.total}
-
-                        <TrackInfo id={'1nXiUKuAu4mHte6Gt2HRdJ'}/>
                     </>
                 ) : (
                     <>Input a valid playlist ID!</>
                 )
                 
                 }
-
             </div>
+            <>
+                {playlist?.tracks?.items.map((item) => (
+                    <div className="main-wrapper3">
+                        <Track key={item.track.id} id={item.track.id} />
+                    </div>
+                ))}
+            </>
         </div>
     );
 }

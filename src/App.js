@@ -28,7 +28,7 @@ function App() {
     return(
       <div className="App">
         <div>
-          <TrackInfo/>
+          <PlaylistInfo/>
         </div>
         <div>
           {//<WebPlayback token={token}/> 

@@ -1,5 +1,6 @@
 import React from 'react';
 import {useState, useEffect} from 'react';
+import Track from './components/Track';
 
 function PlaylistInfo() {
     const [inputValue, setInputValue] = useState('');
@@ -46,6 +47,8 @@ function PlaylistInfo() {
                         {playlist.name}
                         <br />
                         Followers: {playlist.followers.total}
+
+                        <TrackInfo id={'1nXiUKuAu4mHte6Gt2HRdJ'}/>
                     </>
                 ) : (
                     <>Input a valid playlist ID!</>

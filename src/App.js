@@ -27,9 +27,7 @@ function App() {
   else{
     return(
       <div className="App">
-        <div className="Playlist">
           <PlaylistInfo/>
-        </div>
         <div className="Playback">
           <WebPlayback token={token}/>
         </div>

@@ -37,7 +37,7 @@ function Track(props) {
         <>
                 {
                 track !== null ? (
-                    <>
+                    <div className="main-wrapper3">
                         <img src={track.album.images[0].url} className="track_cover" alt="" />
                         Name: {track.name}
                         <br />
@@ -52,9 +52,9 @@ function Track(props) {
                                 Artist Popularity: {artist.popularity}
                             </>
                         ) : null}
-                    </>
+                    </div>
                 ) : (
-                    <>Input a valid track id!</>
+                    <div className="main-wrapper3">Input a valid track id!</div>
                 )
                 
                 }

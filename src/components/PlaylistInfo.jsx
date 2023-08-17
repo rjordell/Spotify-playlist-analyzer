@@ -26,8 +26,8 @@ function PlaylistInfo() {
     }
 
     return (
-        <>
-            <div className="main-wrapper2">
+        <div className="Playlist">
+            <div className="PlaylistInfo">
                     <input
                         name = "mybutton"
                         placeholder="Enter Playlist ID"
@@ -54,14 +54,12 @@ function PlaylistInfo() {
                 
                 }
             </div>
-            <>
+            <div className="SongBox">
                 {playlist?.tracks?.items.map((item) => (
-                    <div className="main-wrapper3">
                         <Track key={item.track.id} id={item.track.id} />
-                    </div>
                 ))}
-            </>
-        </>
+            </div>
+        </div>
     );
 }
 

@@ -12,7 +12,7 @@ body {
   background-color: #080808;
   color: #eee;
   font-family: Helvetica, Arial;
-  font-size: 3vmin;
+  font-size: 2vmin;
 }
 
 .App {
@@ -63,30 +63,45 @@ body {
   z-index: 1;
 }
 
-.main-wrapper2 {
+.PlaylistInfo {
   padding: 0.5em;
   align-items: center;
   display: flex;
-  height: 100%;
+  height: 25vh;
+  margin-top: 0em;
   justify-content: left;
   position: relative;
   width: 100%;
   z-index: 1;
   text-align: left;
   flex-direction: column;
-  background-color: #333;
+  background-color: #222;
+  border-radius: 10px 10px 0px 0px;
 }
 
 .main-wrapper3 {
   padding: 0.5em;
   align-items: center;
   display: flex;
-  height: 100%;
+  height: 25vh;
+  margin-top: 0.5em;
   justify-content: left;
-  position: relative;
-  width: 100%;
-  z-index: 1;
+  width: 99%;
   text-align: left;
+  background-color: #222;
+  border-radius: 10px;
+}
+
+.SongBox {
+  display: flex;
+  width: 100%;
+  overflow-y: auto;
+  max-height: 60vh;
+  align-items: center;
+  background-color: #111;
+  flex-direction: column;
+  border-radius: 0px 0px 10px 10px;
+  font-size: 2vmin;
 }
 
 .main-wrapper4 {
@@ -103,15 +118,16 @@ body {
 }
 
 .Playlist {
-  overflow-y: auto;
   display: flex;
   align-items: center;
   width: 100%;
   max-height: 85vh;
   margin: 2.5vh;
+  margin-bottom: 0vh;
   flex-direction: column;
-  background-color: #333;
+  background-color: #111;
   border-radius: 10px;
+  font-size: 2.5vmin;
 }
 
 .Playback {
@@ -185,8 +201,8 @@ body {
   float: left;
   margin-right: 10px;
   text-align: right;
-  width: 200px;
-  height: 200px;
+  width: 100px;
+  height: 100px;
 }
 
 .now-playing__side {

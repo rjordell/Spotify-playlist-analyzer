@@ -30,9 +30,6 @@ function App() {
         <div className="Playlist">
           <PlaylistInfo/>
         </div>
-        <div className="Playlist2">
-          <PlaylistInfo/>
-        </div>
         <div className="Playback">
           <WebPlayback token={token}/>
         </div>

@@ -27,7 +27,10 @@ function App() {
   else{
     return(
       <div className="App">
-        <div className="container">
+        <div className="Playlist">
+          <PlaylistInfo/>
+        </div>
+        <div className="Playlist2">
           <PlaylistInfo/>
         </div>
         <div className="Playback">

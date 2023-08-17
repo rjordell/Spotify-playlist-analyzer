@@ -17,6 +17,8 @@ body {
 
 .App {
   text-align: center;
+  display: flex;
+  
 }
 
 .App-header {
@@ -66,7 +68,7 @@ body {
   margin: 0.5em;
   margin-bottom: 0;
   justify-content: left;
-  position: static;
+  position: relative;
   width: 95%;
   z-index: 1;
   text-align: left;
@@ -79,14 +81,11 @@ body {
   align-items: center;
   display: flex;
   height: 100%;
-  margin-top: 0.5em;
-  margin-bottom: 0;
   justify-content: left;
-  position: static;
+  position: relative;
   width: 95%;
   z-index: 1;
   text-align: left;
-  background-color: #333;
 }
 
 .main-wrapper4 {
@@ -100,6 +99,25 @@ body {
   width: 32.5%;
   z-index: 1;
   text-align: left;
+}
+
+.Playlist {
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  width: 50vw;
+  max-height: 88vh;
+  flex-direction: column;
+  background-color: #333;
+}
+
+.Playlist2 {
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  width: 50vw;
+  max-height: 88vh;
+  flex-direction: column;
   background-color: #333;
 }
 
@@ -108,9 +126,8 @@ body {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 12%;
+  height: 12vh;
   z-index: 2;
-  background-color: #333;
   text-align: center;
   display: flex;
   flex-direction: row;
@@ -146,11 +163,12 @@ body {
 }
 
 .now-playing__name {
-  font-size: 1em;
+  font-size: 0.8em;
   margin-bottom: 0.2em;
 }
 
 .now-playing__artist {
+  font-size: 0.6em;
   margin-bottom: 0.5em;
 }
 
@@ -178,7 +196,7 @@ body {
 
 .now-playing__side {
   margin-left: 2%;
-  width: 45%;
+  width: 100%;
 }
 
 .btn-spotify {

@@ -26,7 +26,7 @@ function PlaylistInfo() {
     }
 
     return (
-        <div className="container">
+        <>
             <div className="main-wrapper2">
                     <input
                         name = "mybutton"
@@ -61,7 +61,7 @@ function PlaylistInfo() {
                     </div>
                 ))}
             </>
-        </div>
+        </>
     );
 }
 

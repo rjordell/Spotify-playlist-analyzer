@@ -73,12 +73,13 @@ body {
   flex-direction: column;
   background-color: #333;
 }
+
 .main-wrapper3 {
   padding: 0.5em;
   align-items: center;
   display: flex;
   height: 100%;
-  margin: 0.5em;
+  margin-top: 0.5em;
   margin-bottom: 0;
   justify-content: left;
   position: static;
@@ -87,6 +88,49 @@ body {
   text-align: left;
   background-color: #333;
 }
+
+.main-wrapper4 {
+  padding: 0em;
+  align-items: center;
+  display: flex;
+  height: 100%;
+  margin-left: 2.5%;
+  justify-content: left;
+  position: static;
+  width: 32.5%;
+  z-index: 1;
+  text-align: left;
+  background-color: #333;
+}
+
+.Playback {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 12%;
+  z-index: 2;
+  background-color: #333;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+}
+
+.notActive {
+  position: relative;
+  top: 25%;
+  height: 50%;
+  text-align: center;
+}
+
+.playbackBtns {
+  position: relative;
+  top: 25%;
+  height: 50%;
+  width: 30%;
+  text-align: center;
+}
+
 
 .container {
   align-items: center;
@@ -101,12 +145,12 @@ body {
 }
 
 .now-playing__name {
-  font-size: 1.5em;
+  font-size: 1em;
   margin-bottom: 0.2em;
 }
 
 .now-playing__artist {
-  margin-bottom: 1em;
+  margin-bottom: 0.5em;
 }
 
 .now-playing__status {
@@ -114,6 +158,15 @@ body {
 }
 
 .now-playing__cover {
+  border-radius: 8px;
+  float: left;
+  margin-left: 10px;
+  text-align: right;
+  width: 80px;
+  height: 80px;
+}
+
+.track_cover {
   border-radius: 8px;
   float: left;
   margin-right: 10px;

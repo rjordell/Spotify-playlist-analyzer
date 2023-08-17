@@ -39,7 +39,7 @@ function Track(props) {
                 {
                 track !== null ? (
                     <>
-                        <img src={track.album.images[0].url} className="now-playing__cover" alt="" />
+                        <img src={track.album.images[0].url} className="track_cover" alt="" />
                         Name: {track.name}
                         <br />
                         Album: {track.album.name}

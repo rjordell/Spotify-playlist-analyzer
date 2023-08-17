@@ -68,11 +68,9 @@ body {
   align-items: center;
   display: flex;
   height: 100%;
-  margin: 0.5em;
-  margin-bottom: 0;
   justify-content: left;
   position: relative;
-  width: 95%;
+  width: 100%;
   z-index: 1;
   text-align: left;
   flex-direction: column;
@@ -86,7 +84,7 @@ body {
   height: 100%;
   justify-content: left;
   position: relative;
-  width: 95%;
+  width: 100%;
   z-index: 1;
   text-align: left;
 }

@@ -1,5 +1,6 @@
 import React from 'react';
 import {useState, useEffect} from 'react';
+import Track from './Track';
 
 function PlaylistInfo() {
     const [inputValue, setInputValue] = useState('');
@@ -25,8 +26,8 @@ function PlaylistInfo() {
     }
 
     return (
-        <div className="container">
-            <div className="main-wrapper">
+        <div className="Playlist">
+            <div className="PlaylistInfo">
                     <input
                         name = "mybutton"
                         placeholder="Enter Playlist ID"
@@ -52,7 +53,11 @@ function PlaylistInfo() {
                 )
                 
                 }
-
+            </div>
+            <div className="SongBox">
+                {playlist?.tracks?.items.map((item) => (
+                        <Track key={item.track.id} id={item.track.id} />
+                ))}
             </div>
         </div>
     );

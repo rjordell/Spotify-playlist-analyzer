@@ -9,20 +9,25 @@ html, body {
 }
 
 body {
-  background-color: #333;
+  background-color: #080808;
   color: #eee;
   font-family: Helvetica, Arial;
-  font-size: 3vmin;
+  font-size: 2vmin;
 }
 
 .App {
   text-align: center;
+  display: flex;
+  justify-content: center;
+  height: 100vh;
+  
 }
 
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
   display: flex;
+  width: 100%;
+  height: 100%;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -58,11 +63,125 @@ body {
   z-index: 1;
 }
 
+.PlaylistInfo {
+  padding: 0.5em;
+  align-items: center;
+  display: flex;
+  height: 25vh;
+  justify-content: left;
+  position: relative;
+  width: 100%;
+  z-index: 1;
+  text-align: left;
+  flex-direction: column;
+  background-color: #222;
+  border-radius: 10px 10px 0px 0px;
+}
+
+.main-wrapper3 {
+  padding: 0.5em;
+  align-items: center;
+  display: flex;
+  height: 25vh;
+  margin-bottom: 0.5em;
+  justify-content: left;
+  width: 99%;
+  text-align: left;
+  background-color: #222;
+  border-radius: 10px;
+}
+
+.SongBox {
+  display: flex;
+  width: 100%;
+  overflow-y: auto;
+  max-height: 60vh;
+  padding-top: 0.5em;
+  align-items: center;
+  background-color: #111;
+  flex-direction: column;
+  border-radius: 0px 0px 10px 10px;
+  font-size: 2vmin;
+  scrollbar-width: thin;
+  scrollbar-color: #282c34 #111;
+}
+
+.SongBox::-webkit-scrollbar {
+  width: 6px;
+}
+
+.SongBox::-webkit-scrollbar-thumb {
+  background-color: #282c34;
+  border-radius: 3px;
+}
+
+.SongBox::-webkit-scrollbar-track {
+  background-color: #111;
+}
+
+.main-wrapper4 {
+  padding: 0em;
+  align-items: center;
+  display: flex;
+  height: 100%;
+  margin-left: 2.5%;
+  justify-content: left;
+  position: static;
+  width: 32.5%;
+  z-index: 1;
+  text-align: left;
+}
+
+.Playlist {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-height: 85vh;
+  margin: 2.5vh;
+  margin-bottom: 0vh;
+  flex-direction: column;
+  background-color: #111;
+  border-radius: 10px;
+  font-size: 2.5vmin;
+}
+
+.Playback {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 12vh;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+}
+
+.notActive {
+  position: relative;
+  top: 25%;
+  height: 50%;
+  width: 100%;
+  text-align: center;
+}
+
+.playbackBtns {
+  position: relative;
+  display: flex;
+  top: 25%;
+  height: 50%;
+  width: 30%;
+  text-align: center;
+  justify-content: center;
+}
+
+
 .container {
   align-items: center;
   display: flex;
   justify-content: center;
   height: 100%;
+  flex-direction: column;
 }
 
 .main-container {
@@ -70,12 +189,13 @@ body {
 }
 
 .now-playing__name {
-  font-size: 1.5em;
+  font-size: 0.8em;
   margin-bottom: 0.2em;
 }
 
 .now-playing__artist {
-  margin-bottom: 1em;
+  font-size: 0.6em;
+  margin-bottom: 0.5em;
 }
 
 .now-playing__status {
@@ -85,22 +205,31 @@ body {
 .now-playing__cover {
   border-radius: 8px;
   float: left;
+  margin-left: 10px;
+  text-align: right;
+  width: 80px;
+  height: 80px;
+}
+
+.track_cover {
+  border-radius: 8px;
+  float: left;
   margin-right: 10px;
   text-align: right;
-  width: 300px;
-  height: 300px;
+  width: 100px;
+  height: 100px;
 }
 
 .now-playing__side {
   margin-left: 2%;
-  width: 45%;
+  width: 100%;
 }
 
 .btn-spotify {
   background-color:#44c767;
   border-radius:28px;
   border:1px solid #18ab29;
-  display:inline-block;
+  display:flex;
   cursor:pointer;
   color:#ffffff;
   font-family:Arial;

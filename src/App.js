@@ -27,10 +27,10 @@ function App() {
   else{
     return(
       <div className="App">
-          <PlaylistInfo/>
-        <div className="Playback">
+          <div className="mainBox">
+            <PlaylistInfo/>
+          </div>
           <WebPlayback token={token}/>
-        </div>
       </div>
     );
   }

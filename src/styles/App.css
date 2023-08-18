@@ -67,13 +67,13 @@ body {
   padding: 0.5em;
   align-items: center;
   display: flex;
-  height: 25vh;
+  height: 25%;
   justify-content: left;
   position: relative;
   width: 100%;
   z-index: 1;
   text-align: left;
-  flex-direction: column;
+  flex-direction: row;
   background-color: #222;
   border-radius: 10px 10px 0px 0px;
 }
@@ -95,7 +95,7 @@ body {
   display: flex;
   width: 100%;
   overflow-y: auto;
-  max-height: 60vh;
+  max-height: 75%;
   padding-top: 0.5em;
   align-items: center;
   background-color: #111;
@@ -136,7 +136,16 @@ body {
   display: flex;
   align-items: center;
   width: 100%;
-  max-height: 85vh;
+  height: 100%;
+  flex-direction: column;
+  font-size: 2.5vmin;
+}
+
+.mainBox {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-height: 86.5vh;
   margin: 2.5vh;
   margin-bottom: 0vh;
   flex-direction: column;
@@ -145,24 +154,27 @@ body {
   font-size: 2.5vmin;
 }
 
-.Playback {
+.WebPlayer {
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 12vh;
-  z-index: 2;
-  text-align: center;
+  height: 11vh;
   display: flex;
-  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 }
 
 .notActive {
-  position: relative;
-  top: 25%;
-  height: 50%;
+  display: flex;
+  height: auto;
+}
+.Active {
+  display: flex;
   width: 100%;
   text-align: center;
+  align-items: center;
+  flex-direction: row;
 }
 
 .playbackBtns {

@@ -68,7 +68,6 @@ body {
   align-items: center;
   display: flex;
   height: 25vh;
-  margin-top: 0em;
   justify-content: left;
   position: relative;
   width: 100%;
@@ -84,7 +83,7 @@ body {
   align-items: center;
   display: flex;
   height: 25vh;
-  margin-top: 0.5em;
+  margin-bottom: 0.5em;
   justify-content: left;
   width: 99%;
   text-align: left;
@@ -97,11 +96,27 @@ body {
   width: 100%;
   overflow-y: auto;
   max-height: 60vh;
+  padding-top: 0.5em;
   align-items: center;
   background-color: #111;
   flex-direction: column;
   border-radius: 0px 0px 10px 10px;
   font-size: 2vmin;
+  scrollbar-width: thin;
+  scrollbar-color: #282c34 #111;
+}
+
+.SongBox::-webkit-scrollbar {
+  width: 6px;
+}
+
+.SongBox::-webkit-scrollbar-thumb {
+  background-color: #282c34;
+  border-radius: 3px;
+}
+
+.SongBox::-webkit-scrollbar-track {
+  background-color: #111;
 }
 
 .main-wrapper4 {

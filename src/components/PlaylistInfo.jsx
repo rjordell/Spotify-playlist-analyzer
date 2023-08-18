@@ -7,17 +7,14 @@ function PlaylistInfo() {
     const [playlist, setPlaylist] = useState(null);
     
     const getPlaylistinfo = async (id) => {
-        //setPlaylist(null);
         try {
             const response = await fetch('/auth/getPlaylistInfo/' + id);
             const data = await response.json();
             if(data.error){
                 setPlaylist(null);
-                //console.log("caught error")
             }else{
                 setPlaylist(data);
             }
-            //setPlaylist(data);
             console.log(data);
         } catch (error) {
             console.error('Error retrieving playlist info:', error);

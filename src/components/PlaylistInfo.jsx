@@ -30,11 +30,12 @@ function PlaylistInfo() {
                         placeholder="Enter Playlist ID"
                         value={inputValue}
                         onChange={(e) => setInputValue(e.target.value)}
+                        className="Input"
                     />
 
 
                 <button className="btn-spotify" onClick={() => getPlaylistinfo(inputValue)}>
-                    Get playlist info
+                    Get info
                 </button>
                 {
                 
@@ -46,7 +47,7 @@ function PlaylistInfo() {
                         Followers: {playlist.followers.total}
                     </>
                 ) : (
-                    <>Input a valid playlist ID!</>
+                    <></>
                 )
                 
                 }

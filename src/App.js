@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import WebPlayback from './components/player/WebPlayback'
 import Login from './components/Login'
 import MainBox from './components/MainBox';
+import LeftBoxes from './components/LeftBoxes';
 import './styles/App.css';
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
   else{
     return(
       <div className="App">
+          <LeftBoxes/>
           <MainBox/>
           <WebPlayback token={token}/>
       </div>

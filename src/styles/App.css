@@ -19,6 +19,7 @@ body {
   text-align: center;
   display: flex;
   justify-content: center;
+  flex-direction: row;
   height: 100vh;
   
 }
@@ -83,7 +84,7 @@ body {
   align-items: center;
   display: flex;
   height: 25vh;
-  margin-bottom: 0.5%;
+  margin-bottom: 1vh;
   justify-content: left;
   width: 99%;
   text-align: left;
@@ -91,12 +92,16 @@ body {
   border-radius: 10px;
 }
 
+.Input {
+  width: 150px; /* Change the width as needed */
+}
+
 .SongBox {
   display: flex;
   width: 100%;
   overflow-y: auto;
   max-height: 74.5%;
-  margin-top: 0.5%;
+  margin-top: 1vh;
   padding-top: 0;
   align-items: center;
   background-color: #111;
@@ -145,14 +150,37 @@ body {
 .MainBox {
   display: flex;
   align-items: center;
-  width: 100%;
+  width: 80%;
   max-height: 86.5vh;
-  margin: 2.5vh;
+  margin: 1.5vh;
   margin-bottom: 0vh;
   flex-direction: column;
   background-color: #111;
   border-radius: 10px;
   font-size: 2.5vmin;
+}
+
+.LeftBoxes {
+  display: flex;
+  align-items: center;
+  width: 20%;
+  max-height: 86.5vh;
+  margin: 1.5vh;
+  margin-bottom: 0vh;
+  margin-right: 0;
+  flex-direction: column;
+  background-color: #111;
+  border-radius: 10px;
+  font-size: 2.5vmin;
+}
+
+.GoToMainMenuBox {
+  height: 15%;
+}
+
+.UserPlaylistsBox {
+  height: 85%;
+  width: 100%;
 }
 
 .WebPlayer {

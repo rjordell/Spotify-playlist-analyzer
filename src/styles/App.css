@@ -93,7 +93,23 @@ body {
 }
 
 .Input {
-  width: 150px; /* Change the width as needed */
+  width: 150px;
+  padding: 8px;
+  border: none;
+  border-radius: 20px;
+  background-color: #333;
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.Input::placeholder {
+  color: #aaa;
+}
+
+.Input:focus {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .SongBox {

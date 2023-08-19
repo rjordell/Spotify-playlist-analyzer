@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import WebPlayback from './components/player/WebPlayback'
 import Login from './components/Login'
-import PlaylistInfo from './components/PlaylistInfo'
-import TrackInfo from './components/TrackInfo'
+import MainBox from './components/MainBox';
+import LeftBoxes from './components/LeftBoxes';
 import './styles/App.css';
 
 function App() {
@@ -27,10 +27,9 @@ function App() {
   else{
     return(
       <div className="App">
-          <PlaylistInfo/>
-        <div className="Playback">
+          <LeftBoxes/>
+          <MainBox/>
           <WebPlayback token={token}/>
-        </div>
       </div>
     );
   }

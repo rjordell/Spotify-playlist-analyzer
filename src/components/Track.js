@@ -1,10 +1,6 @@
 import React from 'react';
-import {useState, useEffect} from 'react';
 
 function Track(props) {
-    const [track, setTrack] = useState(null);
-    const [artist, setArtist] = useState(null);
-    
     return (
         <div className="main-wrapper3">
 

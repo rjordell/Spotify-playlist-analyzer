@@ -31,6 +31,7 @@ function Track(props) {
     
     useEffect(() => {
         getTrackInfo(props.id);
+        getArtistInfo(props.artistId);
     }, [props.id]);
 
     return (

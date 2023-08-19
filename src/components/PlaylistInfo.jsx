@@ -5,24 +5,8 @@ import Track from './Track';
 function PlaylistInfo() {
     const [inputValue, setInputValue] = useState('');
     const [playlist, setPlaylist] = useState(null);
-    
-    const getPlaylistinfo = async (id) => {
-        try {
-            const response = await fetch('/auth/getPlaylistInfo/' + id);
-            const data = await response.json();
-            if(data.error){
-                setPlaylist(null);
-            }else{
-                setPlaylist(data);
-            }
-            console.log(data);
-        } catch (error) {
-            console.error('Error retrieving playlist info:', error);
-            setPlaylist(null); // Clear playlist in case of error
-        }
-    }
 
-    const getPlaylistinfo2 = async (id) => {
+    const getPlaylistinfo = async (id) => {
         try {
             const response = await fetch('/auth/getAllPlaylistTracks/' + id);
             const data = await response.json();
@@ -49,7 +33,7 @@ function PlaylistInfo() {
                         className="Input"
                     />
 
-                <button className="btn-spotify" onClick={() => getPlaylistinfo2(inputValue)}>
+                <button className="btn-spotify" onClick={() => getPlaylistinfo(inputValue)}>
                     Get info
                 </button>
 
@@ -70,10 +54,9 @@ function PlaylistInfo() {
             </div>
             <div className="SongBox">
                 {playlist?.tracks?.items.map((item) => (
-                    <Track key={item.track.id} id={item.track.id} />
+                    <Track key={item.track.id} id={item.track.id} artistId={item.track.artists[0].id} /> 
                 ))
-
-            }
+                }
             </div>
         </div>
     );

@@ -89,7 +89,6 @@ body {
   z-index: 1;
   text-align: left;
   flex-direction: row;
-  background-color: #222;
   border-radius: 10px 10px 0px 0px;
 }
 
@@ -133,11 +132,13 @@ body {
   display: flex;
   width: 99%;
   height: 25vh;
-  margin-bottom: 1vh;
   justify-content: left;
   text-align: left;
-  background-color: #222;
   border-radius: 10px;
+}
+
+.trackContainer:hover {
+  background-color: #222;
 }
 
 .playlistContainer {
@@ -147,11 +148,13 @@ body {
   display: flex;
   width: 99%;
   height: 25vh;
-  margin-bottom: 1vh;
   justify-content: left;
   text-align: left;
-  background-color: #222;
   border-radius: 10px;
+}
+
+.playlistContainer:hover {
+  background-color: #222;
 }
 
 .Input {
@@ -181,7 +184,6 @@ body {
   max-height: 74.5%;
   margin-top: 1vh;
   align-items: center;
-  background-color: #111;
   flex-direction: column;
   border-radius: 0px 0px 10px 10px;
   font-size: 1.5vmin;
@@ -206,15 +208,13 @@ body {
   background-color: #111;
 }
 
-.main-wrapper4 {
-  padding: 0em;
+.webPlayerBox {
   align-items: center;
   display: flex;
   height: 100%;
-  margin-left: 2.5%;
   justify-content: left;
-  position: static;
-  width: 32.5%;
+  width: 35%;
+  padding-left: 0.5em;
   z-index: 1;
   text-align: left;
 }
@@ -289,19 +289,19 @@ body {
   display: flex;
   height: auto;
 }
+
 .Active {
   display: flex;
   width: 100%;
+  height: 100%;
   text-align: center;
   align-items: center;
+  justify-content: left;
   flex-direction: row;
 }
 
 .playbackBtns {
-  position: relative;
   display: flex;
-  top: 25%;
-  height: 50%;
   width: 30%;
   text-align: center;
   justify-content: center;
@@ -319,14 +319,14 @@ body {
   flex: 1;
 }
 
-.now-playing__name {
-  font-size: 0.8em;
-  margin-bottom: 0.2em;
+.containerHeader {
+  font-size: 1.5vmin;
+  margin-bottom: 0.5em;
 }
 
-.now-playing__artist {
-  font-size: 0.6em;
-  margin-bottom: 0.5em;
+.containerSubheader {
+  font-size: 1.2vmin;
+  color: #aaa;
 }
 
 .now-playing__status {
@@ -334,18 +334,16 @@ body {
 }
 
 .now-playing__cover {
-  border-radius: 8px;
+  border-radius: 5px;
   float: left;
-  margin-left: 10px;
   text-align: right;
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
 }
 
 .track_cover {
   border-radius: 0px;
   float: left;
-  margin-right: 10px;
   text-align: right;
   width: 50px;
   height: 50px;
@@ -354,14 +352,13 @@ body {
 .playlists_cover {
   border-radius: 5px;
   float: left;
-  margin-right: 10px;
   text-align: right;
   width: 50px;
   height: 50px;
 }
 
 .now-playing__side {
-  margin-left: 2%;
+  margin-left: 10px;
   width: 100%;
 }
 

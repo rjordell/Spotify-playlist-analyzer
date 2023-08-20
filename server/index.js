@@ -128,27 +128,6 @@ app.get("/auth/getUsersPlaylists/:id", (req, res) => {
 });
 
 app.get("/auth/getCurrentUsersPlaylists/", (req, res) => {
-  let data = null;
-
-  request.get(
-    `https://api.spotify.com/v1/me/playlists`,
-    {
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-      },
-    },
-    (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        data = JSON.parse(body);
-        res.json(data);
-      } else {
-        res.status(response.statusCode).json({ error: "Invalid user id" });
-      }
-    }
-  );
-});
-
-app.get("/auth/getCurrentUsersPlaylists/", (req, res) => {
   let allPlaylists = [];
   let data = null;
 

@@ -35,7 +35,8 @@ var splitArrayIntoChunks = function (arr, chunkSize) {
 var app = express();
 
 app.get("/auth/login", (req, res) => {
-  var scope = "streaming user-read-email user-read-private";
+  var scope =
+    "streaming user-read-email user-read-private playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public user-library-modify user-library-read";
   var state = generateRandomString(16);
 
   var auth_query_parameters = new URLSearchParams({
@@ -73,6 +74,80 @@ app.get("/auth/getPlaylistinfo/:id", (req, res) => {
   );
 });
 
+app.get("/auth/getUsersPlaylists/:id", (req, res) => {
+  const userId = req.params.id;
+  let allPlaylists = [];
+  let data = null;
+
+  const fetchPlaylists = (url) => {
+    request.get(
+      url,
+      {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      },
+      (error, response, body) => {
+        if (!error && response.statusCode === 200) {
+          const PlaylistItems = JSON.parse(body);
+          allPlaylists = allPlaylists.concat(PlaylistItems.items);
+          if (PlaylistItems.next) {
+            fetchPlaylists(PlaylistItems.next);
+          } else {
+            data.items = allPlaylists;
+            res.json(data);
+          }
+        } else {
+          res.status(response.statusCode).json({ error: "Invalid playlists" });
+        }
+      }
+    );
+  };
+
+  request.get(
+    `https://api.spotify.com/v1/users/${userId}/playlists`,
+    {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    },
+    (error, response, body) => {
+      if (!error && response.statusCode === 200) {
+        data = JSON.parse(body);
+        if (data.next) {
+          allPlaylists = allPlaylists.concat(data.items);
+          fetchPlaylists(data.next);
+        } else {
+          res.json(data);
+        }
+      } else {
+        res.status(response.statusCode).json({ error: "Invalid user id" });
+      }
+    }
+  );
+});
+
+app.get("/auth/getCurrentUsersPlaylists/", (req, res) => {
+  let data = null;
+
+  request.get(
+    `https://api.spotify.com/v1/me/playlists`,
+    {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    },
+    (error, response, body) => {
+      if (!error && response.statusCode === 200) {
+        data = JSON.parse(body);
+        res.json(data);
+      } else {
+        res.status(response.statusCode).json({ error: "Invalid user id" });
+      }
+    }
+  );
+});
+
 app.get("/auth/getCurrentUsersPlaylists/", (req, res) => {
   let allPlaylists = [];
   let data = null;
@@ -92,7 +167,7 @@ app.get("/auth/getCurrentUsersPlaylists/", (req, res) => {
           if (PlaylistItems.next) {
             fetchPlaylists(PlaylistItems.next);
           } else {
-            data.items = allTracks;
+            data.items = allPlaylists;
             res.json(data);
           }
         } else {
@@ -200,8 +275,6 @@ app.get("/auth/getMultipleTracksAudioFeatures/:ids", async (req, res) => {
         (error, response, body) => {
           if (!error && response.statusCode === 200) {
             const trackInfo = JSON.parse(body);
-            //console.log("track info: ")
-            //console.log(trackInfo)
             resolve(trackInfo);
           } else {
             reject(error);
@@ -214,15 +287,11 @@ app.get("/auth/getMultipleTracksAudioFeatures/:ids", async (req, res) => {
 
   try {
     const trackInfoResults = await Promise.all(trackInfoPromises);
-    //console.log("track info results: ")
-    //console.log(trackInfoResults)
     const combinedTrackInfo = trackInfoResults.reduce(
       (accumulator, current) => accumulator.concat(current.audio_features),
       []
     );
     res.json({ tracks: combinedTrackInfo });
-    //console.log("combined track info: ")
-    //console.log(combinedTrackInfo)
   } catch (error) {
     res.status(500).json({ error: "Error fetching track information" });
   }
@@ -247,8 +316,6 @@ app.get("/auth/getMultipleArtists/:ids", async (req, res) => {
         (error, response, body) => {
           if (!error && response.statusCode === 200) {
             const artistInfo = JSON.parse(body);
-            //console.log("artist info: ")
-            //console.log(artistInfo)
             resolve(artistInfo);
           } else {
             reject(error);
@@ -261,15 +328,11 @@ app.get("/auth/getMultipleArtists/:ids", async (req, res) => {
 
   try {
     const artistInfoResults = await Promise.all(artistInfoPromises);
-    //console.log("artist info results: ")
-    //console.log(artistInfoResults)
     const combinedArtistInfo = artistInfoResults.reduce(
       (accumulator, current) => accumulator.concat(current.artists),
       []
     );
     res.json({ artists: combinedArtistInfo });
-    //console.log("combined artist info: ")
-    //console.log(combinedArtistInfo)
   } catch (error) {
     res.status(500).json({ error: "Error fetching artist information" });
   }

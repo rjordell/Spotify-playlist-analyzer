@@ -1,10 +1,8 @@
 import React from "react";
 
 function Playlist(props) {
-  console.log("reached component");
-  console.log(props);
   return (
-    <div className="main-wrapper3">
+    <div className="playlistContainer">
       <>
         <img
           src={props.playlist.images[0].url}

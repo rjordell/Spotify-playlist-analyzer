@@ -16,6 +16,7 @@ function UserPlaylistsBox() {
       } else {
         setPlaylists(data);
       }
+      console.log("current users playlsits");
       console.log(data);
     } catch (error) {
       console.error("Error retrieving current user's playlists:", error);
@@ -62,12 +63,9 @@ function UserPlaylistsBox() {
       </div>
       <div className="PlaylistsBox">
         {playlists !== null ? (
-          (console.log("reached this part"),
-          console.log(playlists),
-          console.log(Array.isArray(playlists.items)),
           playlists?.items.map((item) => (
             <Playlist key={item.id} playlist={item} />
-          )))
+          ))
         ) : (
           <></>
         )}

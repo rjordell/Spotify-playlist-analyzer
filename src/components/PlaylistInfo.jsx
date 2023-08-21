@@ -66,6 +66,7 @@ function PlaylistInfo(props) {
     if (props.playlistId) {
       setArtists(null);
       setAudioFeatures(null);
+      setPlaylist(null);
       getPlaylistinfo(props.playlistId);
     }
   }, [props.playlistId]);

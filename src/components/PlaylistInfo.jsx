@@ -64,6 +64,8 @@ function PlaylistInfo(props) {
 
   useEffect(() => {
     if (props.playlistId) {
+      setArtists(null);
+      setAudioFeatures(null);
       getPlaylistinfo(props.playlistId);
     }
   }, [props.playlistId]);

@@ -42,7 +42,7 @@ function UserPlaylistsBox({ onPlaylistClick }) {
 
   useEffect(() => {
     getCurrentUsersPlaylists();
-  }, [user]);
+  }, []);
 
   return (
     <div className="UserPlaylistsBox">
@@ -64,11 +64,7 @@ function UserPlaylistsBox({ onPlaylistClick }) {
       <div className="PlaylistsBox">
         {playlists !== null ? (
           playlists?.items.map((item) => (
-            <Playlist
-              key={item.id}
-              playlist={item}
-              onClick={() => onPlaylistClick(item.id)}
-            />
+            <Playlist key={item.id} playlist={item} onClick={onPlaylistClick} />
           ))
         ) : (
           <></>

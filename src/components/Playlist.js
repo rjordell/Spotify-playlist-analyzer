@@ -1,8 +1,11 @@
 import React from "react";
 
 function Playlist(props) {
+  const handleClick = () => {
+    props.onClick(props.playlist.id);
+  };
   return (
-    <div className="playlistContainer">
+    <div className="playlistContainer" onClick={handleClick}>
       <div className="imageAndTitle">
         <div className="imageCovers">
           <img

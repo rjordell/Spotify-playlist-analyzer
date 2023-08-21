@@ -3,8 +3,7 @@ import { useState, useEffect } from "react";
 import Track from "./Track";
 import "../styles/DisplayPlaylistComponent.css";
 
-function PlaylistInfo() {
-  const [inputValue, setInputValue] = useState("");
+function PlaylistInfo(props) {
   const [playlist, setPlaylist] = useState(null);
   const [artists, setArtists] = useState(null);
   const [audioFeatures, setAudioFeatures] = useState(null);
@@ -64,6 +63,12 @@ function PlaylistInfo() {
   };
 
   useEffect(() => {
+    if (props.playlistId) {
+      getPlaylistinfo(props.playlistId);
+    }
+  }, [props.playlistId]);
+
+  useEffect(() => {
     if (playlist) {
       const artistIds = playlist.tracks.items
         .map((item) => item.track.artists[0].id)
@@ -76,25 +81,12 @@ function PlaylistInfo() {
       //console.log("track ids: "+ trackIds)
       getTracksAudioFeatures(trackIds);
     }
-  }, [playlist, inputValue]);
+  }, [playlist]);
 
   return (
     <div className="Playlist">
       <div className="PlaylistInfo">
-        <input
-          name="mybutton"
-          placeholder="Enter Playlist ID"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          className="Input"
-        />
-        <button
-          className="btn-spotify"
-          onClick={() => getPlaylistinfo(inputValue)}
-        >
-          Get info
-        </button>
-        {playlist !== null ? (
+        {playlist && (
           <>
             <img
               src={playlist.images[0].url}
@@ -105,8 +97,6 @@ function PlaylistInfo() {
             <br />
             Followers: {playlist.followers.total}
           </>
-        ) : (
-          <></>
         )}
       </div>
       <div className="SongBox">

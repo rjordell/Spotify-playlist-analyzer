@@ -176,9 +176,8 @@ body {
 
 .containerHeader {
   font-size: 1.5vmin;
-
-  height: 1.5vmax;
-  width: 14vmax;
+  height: 1.4vmax;
+  width: 13.5vmax;
   white-space: nowrap; /* Prevent text from wrapping */
   overflow-x: hidden; /* Hide overflowed content */
   text-overflow: ellipsis; /* Display an ellipsis (...) for clipped text */
@@ -187,8 +186,8 @@ body {
 .containerSubheader {
   font-size: 1.2vmin;
   color: #aaa;
-  height: 0.8vmax;
-  width: 14vmax;
+  height: 0.9vmax;
+  width: 13.5vmax;
   white-space: nowrap; /* Prevent text from wrapping */
   overflow-x: hidden; /* Hide overflowed content */
   text-overflow: ellipsis; /* Display an ellipsis (...) for clipped text */

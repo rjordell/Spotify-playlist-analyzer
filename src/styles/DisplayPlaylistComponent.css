@@ -1,0 +1,84 @@
+.Playlist {
+  display: flex;
+  align-items: center;
+  width: 79vw;
+  height: 89vh;
+  flex-direction: column;
+  font-size: 2.5vmin;
+}
+
+.PlaylistInfo {
+  padding: 0.5em;
+  align-items: center;
+  display: flex;
+  height: 20vh;
+  justify-content: left;
+  position: relative;
+  width: 100%;
+  z-index: 1;
+  text-align: left;
+  flex-direction: row;
+  background-color: #222;
+  border-radius: 10px 10px 0px 0px;
+}
+
+.SongBox {
+  display: flex;
+  width: 78.5vw;
+  overflow-y: hidden;
+  margin-top: 0.5vh;
+  margin-left: 0.5vh;
+  margin-bottom: 0.5vh;
+  height: 68.5vh;
+  flex-direction: column;
+  border-radius: 0px 0px 10px 10px;
+  font-size: 1.5vmin;
+  scrollbar-width: thin;
+  scrollbar-color: #282c34 #111;
+}
+
+.SongBox:hover {
+  overflow-y: scroll;
+}
+
+.SongBox::-webkit-scrollbar {
+  width: 0.5vmax;
+}
+
+.SongBox::-webkit-scrollbar-thumb {
+  background-color: #282c34;
+  border-radius: 3px;
+}
+
+.SongBox::-webkit-scrollbar-track {
+  background-color: #111;
+}
+
+.trackContainer {
+  align-items: center;
+  padding: 0.4vmax;
+  padding-right: 0;
+  display: flex;
+  width: 100%;
+  height: 3.3vmax;
+  justify-content: stretch;
+  text-align: left;
+  border-radius: 5px;
+  flex-direction: row;
+}
+.trackContainer:hover {
+  background-color: #222;
+}
+
+.track_cover {
+  border-radius: 0px;
+  float: left;
+  text-align: right;
+  width: 2.5vmax;
+  height: 2.5vmax;
+}
+
+.everythingElse {
+  width: 80%;
+  display: flex;
+}

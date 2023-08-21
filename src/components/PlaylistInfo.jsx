@@ -1,6 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import Track from "./Track";
+import "../styles/DisplayPlaylistComponent.css";
 
 function PlaylistInfo() {
   const [inputValue, setInputValue] = useState("");

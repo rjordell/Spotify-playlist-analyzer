@@ -1,38 +1,49 @@
-import React from 'react';
-import {useState, useEffect} from 'react';
+import React from "react";
 
 function Track(props) {
-    const [track, setTrack] = useState(null);
-    const [artist, setArtist] = useState(null);
-    
-    return (
-        <div className="main-wrapper3">
-
-                    <>
-                        <img src={props.track.album.images[0].url} className="track_cover" alt="" />
-                        Name: {props.track.name}
-                        <br/>
-                        Album: {props.track.album.name}
-                        <br/>
-                        Artist: {props.track.artists[0].name}
-                        <br/>
-                        Song Popularity: {props.track.popularity}
-                        <br/>
-                        Artist Popularity: {props.artist.popularity}
-                    </>
-                    <div>
-                        Danceability: {props.audioFeatures.danceability}
-                        <br/>
-                        Energy: {props.audioFeatures.energy}
-                        <br/>
-                        Tempo: {props.audioFeatures.tempo}
-                        <br/>
-                        Valence: {props.audioFeatures.valence}
-                    </div>
-
+  return (
+    <div className="trackContainer">
+      <div className="imageAndTitle">
+        <div className="imageCovers">
+          <img
+            src={props.track.album.images[0].url}
+            className="track_cover"
+            alt=""
+          />
         </div>
-    );
+        <div className="now-playing__side">
+          <div className="containerHeader">{props.track.name}</div>
+          <div className="containerSubheader">
+            {props.track.artists[0].name}
+          </div>
+        </div>
+      </div>
+      <div className="everythingElse">
+        <div className="now-playing__side">
+          <div className="containerHeader">{props.track.popularity}</div>
+          <div className="containerSubheader">{props.artist.popularity}</div>
+        </div>
+        <div className="now-playing__side">
+          <div className="containerHeader">{props.artist.followers.total}</div>
+          <div className="containerSubheader">followers</div>
+        </div>
+        <div className="now-playing__side">
+          <div className="containerHeader">{props.audioFeatures.tempo}</div>
+          <div className="containerSubheader">tempo</div>
+        </div>
+        <div className="now-playing__side">
+          <div className="containerHeader">{props.audioFeatures.energy}</div>
+          <div className="containerSubheader">energy</div>
+        </div>
+        <div className="now-playing__side">
+          <div className="containerHeader">
+            {props.audioFeatures.danceability}
+          </div>
+          <div className="containerSubheader">danceability</div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default Track;
-

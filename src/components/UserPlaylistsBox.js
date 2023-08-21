@@ -1,6 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import Playlist from "./Playlist";
+import "../styles/UserPlaylistsBox.css";
 
 function UserPlaylistsBox() {
   const [inputValue, setInputValue] = useState("");

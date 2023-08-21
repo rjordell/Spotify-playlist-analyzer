@@ -63,100 +63,6 @@ body {
   z-index: 1;
 }
 
-.PlaylistInfo {
-  padding: 0.5em;
-  align-items: center;
-  display: flex;
-  height: 25%;
-  justify-content: left;
-  position: relative;
-  width: 100%;
-  z-index: 1;
-  text-align: left;
-  flex-direction: row;
-  background-color: #222;
-  border-radius: 10px 10px 0px 0px;
-}
-
-.UserInfo {
-  padding: 0.5em;
-  align-items: center;
-  display: flex;
-  height: 20%;
-  justify-content: left;
-  position: relative;
-  width: 100%;
-  z-index: 1;
-  text-align: left;
-  flex-direction: row;
-  border-radius: 10px 10px 0px 0px;
-}
-
-.PlaylistsBox {
-  display: flex;
-  width: 98%;
-  overflow-y: hidden;
-  max-height: 78%;
-  margin-top: 1vh;
-  padding-top: 0;
-  align-items: center;
-  background-color: #111;
-  flex-direction: column;
-  border-radius: 0px 0px 10px 10px;
-  font-size: 1.5vmin;
-  scrollbar-width: thin;
-  scrollbar-color: #282c34 #111;
-}
-
-.PlaylistsBox:hover {
-  overflow-y: auto;
-}
-
-.PlaylistsBox::-webkit-scrollbar {
-  width: 6px;
-}
-
-.PlaylistsBox::-webkit-scrollbar-thumb {
-  background-color: #282c34;
-  border-radius: 3px;
-}
-
-.PlaylistsBox::-webkit-scrollbar-track {
-  background-color: #111;
-}
-
-.trackContainer {
-  padding: 0.5em;
-  padding-right: 0em;
-  align-items: center;
-  display: flex;
-  width: 99%;
-  height: 25vh;
-  justify-content: left;
-  text-align: left;
-  border-radius: 10px;
-}
-
-.trackContainer:hover {
-  background-color: #222;
-}
-
-.playlistContainer {
-  padding: 0.5em;
-  padding-right: 0em;
-  align-items: center;
-  display: flex;
-  width: 99%;
-  height: 25vh;
-  justify-content: left;
-  text-align: left;
-  border-radius: 10px;
-}
-
-.playlistContainer:hover {
-  background-color: #222;
-}
-
 .Input {
   width: 150px;
   padding: 8px;
@@ -177,37 +83,6 @@ body {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.SongBox {
-  display: flex;
-  width: 100%;
-  overflow-y: hidden;
-  max-height: 74.5%;
-  margin-top: 1vh;
-  align-items: center;
-  flex-direction: column;
-  border-radius: 0px 0px 10px 10px;
-  font-size: 1.5vmin;
-  scrollbar-width: thin;
-  scrollbar-color: #282c34 #111;
-}
-
-.SongBox:hover {
-  overflow-y: scroll;
-}
-
-.SongBox::-webkit-scrollbar {
-  width: 6px;
-}
-
-.SongBox::-webkit-scrollbar-thumb {
-  background-color: #282c34;
-  border-radius: 3px;
-}
-
-.SongBox::-webkit-scrollbar-track {
-  background-color: #111;
-}
-
 .webPlayerBox {
   align-items: center;
   display: flex;
@@ -219,20 +94,11 @@ body {
   text-align: left;
 }
 
-.Playlist {
-  display: flex;
-  align-items: center;
-  width: 80vw;
-  height: 100%;
-  flex-direction: column;
-  font-size: 2.5vmin;
-}
-
 .MainBox {
   display: flex;
   align-items: center;
-  width: 80vw;
-  max-height: 89vh;
+  width: 79vw;
+  height: 89vh;
   margin: 1vh;
   margin-bottom: 0vh;
   flex-direction: column;
@@ -244,8 +110,8 @@ body {
 .LeftBoxes {
   display: flex;
   align-items: center;
-  width: 20vw;
-  max-height: 89vh;
+  width: 19vw;
+  height: 89vh;
   margin: 1vh;
   margin-bottom: 0vh;
   margin-right: 0;
@@ -259,17 +125,6 @@ body {
   height: 10vh;
   width: 100%;
   margin-bottom: 1vh;
-  background-color: #111;
-  border-radius: 10px;
-}
-
-.UserPlaylistsBox {
-  height: 78vh;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  flex-direction: column;
-  font-size: 2.5vmin;
   background-color: #111;
   border-radius: 10px;
 }
@@ -322,15 +177,35 @@ body {
 .containerHeader {
   font-size: 1.5vmin;
   margin-bottom: 0.5em;
+  max-height: 40%;
+  width: 14vmax;
+  white-space: nowrap; /* Prevent text from wrapping */
+  overflow-x: hidden; /* Hide overflowed content */
+  text-overflow: ellipsis; /* Display an ellipsis (...) for clipped text */
 }
 
 .containerSubheader {
   font-size: 1.2vmin;
   color: #aaa;
+  max-height: 40%;
+  width: 14vmax;
+  white-space: nowrap; /* Prevent text from wrapping */
+  overflow-x: hidden; /* Hide overflowed content */
+  text-overflow: ellipsis; /* Display an ellipsis (...) for clipped text */
 }
 
 .now-playing__status {
   margin-bottom: 1em;
+}
+
+.imageCovers {
+  width: 2.5vmax;
+}
+
+.imageAndTitle {
+  width: 17.5vw;
+  justify-content: left;
+  text-align: left;
 }
 
 .now-playing__cover {
@@ -341,25 +216,13 @@ body {
   height: 60px;
 }
 
-.track_cover {
-  border-radius: 0px;
-  float: left;
-  text-align: right;
-  width: 50px;
-  height: 50px;
-}
-
-.playlists_cover {
-  border-radius: 5px;
-  float: left;
-  text-align: right;
-  width: 50px;
-  height: 50px;
-}
-
 .now-playing__side {
-  margin-left: 10px;
-  width: 100%;
+  height: 100%;
+  width: 13.5vw;
+  margin-left: 0.5vmax;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .btn-spotify {

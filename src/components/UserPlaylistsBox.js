@@ -5,8 +5,11 @@ import "../styles/UserPlaylistsBox.css";
 
 function UserPlaylistsBox() {
   const [inputValue, setInputValue] = useState("");
-  const [user, setUser] = useState(null);
   const [playlists, setPlaylists] = useState(null);
+
+  const handlePlaylistClick = (playlistId) => {
+    onItemClick(playlistId);
+  };
 
   const getCurrentUsersPlaylists = async () => {
     try {
@@ -65,7 +68,11 @@ function UserPlaylistsBox() {
       <div className="PlaylistsBox">
         {playlists !== null ? (
           playlists?.items.map((item) => (
-            <Playlist key={item.id} playlist={item} />
+            <Playlist
+              key={item.id}
+              playlist={item}
+              onClick={() => handlePlaylistClick(item.id)}
+            />
           ))
         ) : (
           <></>

@@ -3,9 +3,8 @@ import { useState, useEffect } from "react";
 import Playlist from "./Playlist";
 import "../styles/UserPlaylistsBox.css";
 
-function UserPlaylistsBox() {
+function UserPlaylistsBox({ onPlaylistClick }) {
   const [inputValue, setInputValue] = useState("");
-  const [user, setUser] = useState(null);
   const [playlists, setPlaylists] = useState(null);
 
   const getCurrentUsersPlaylists = async () => {
@@ -43,7 +42,7 @@ function UserPlaylistsBox() {
 
   useEffect(() => {
     getCurrentUsersPlaylists();
-  }, [user]);
+  }, []);
 
   return (
     <div className="UserPlaylistsBox">
@@ -65,7 +64,7 @@ function UserPlaylistsBox() {
       <div className="PlaylistsBox">
         {playlists !== null ? (
           playlists?.items.map((item) => (
-            <Playlist key={item.id} playlist={item} />
+            <Playlist key={item.id} playlist={item} onClick={onPlaylistClick} />
           ))
         ) : (
           <></>

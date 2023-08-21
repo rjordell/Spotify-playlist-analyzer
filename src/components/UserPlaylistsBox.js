@@ -7,10 +7,6 @@ function UserPlaylistsBox() {
   const [inputValue, setInputValue] = useState("");
   const [playlists, setPlaylists] = useState(null);
 
-  const handlePlaylistClick = (playlistId) => {
-    onItemClick(playlistId);
-  };
-
   const getCurrentUsersPlaylists = async () => {
     try {
       const response = await fetch("/auth/getCurrentUsersPlaylists/");
@@ -68,11 +64,7 @@ function UserPlaylistsBox() {
       <div className="PlaylistsBox">
         {playlists !== null ? (
           playlists?.items.map((item) => (
-            <Playlist
-              key={item.id}
-              playlist={item}
-              onClick={() => handlePlaylistClick(item.id)}
-            />
+            <Playlist key={item.id} playlist={item} onClick={() => item.id} />
           ))
         ) : (
           <></>

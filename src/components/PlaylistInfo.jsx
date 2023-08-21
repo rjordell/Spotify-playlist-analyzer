@@ -7,6 +7,7 @@ function PlaylistInfo(props) {
   const [playlist, setPlaylist] = useState(null);
   const [artists, setArtists] = useState(null);
   const [audioFeatures, setAudioFeatures] = useState(null);
+  const [combinedData, setCombinedData] = useState(null);
 
   const getPlaylistinfo = async (id) => {
     try {
@@ -62,17 +63,28 @@ function PlaylistInfo(props) {
     }
   };
 
-  useEffect(() => {
-    if (props.playlistId) {
-      setArtists(null);
-      setAudioFeatures(null);
-      setPlaylist(null);
-      getPlaylistinfo(props.playlistId);
-    }
-  }, [props.playlistId]);
-
-  useEffect(() => {
-    if (playlist) {
+  const combineData = async () => {
+    if (playlist && artists && audioFeatures) {
+      const combinedTracks = playlist.tracks.items.map((item, index) => {
+        const trackWithArtist = {
+          ...item.track,
+          artists: [artists.artists[index]],
+          ...audioFeatures.tracks[index],
+        };
+        return trackWithArtist;
+      });
+      const updatedPlaylist = {
+        ...playlist,
+        tracks: {
+          ...playlist.tracks,
+          items: combinedTracks,
+        },
+      };
+      setCombinedData({
+        playlist: updatedPlaylist,
+      });
+      console.log(combinedData);
+    } else if (playlist) {
       const artistIds = playlist.tracks.items
         .map((item) => item.track.artists[0].id)
         .join(",");
@@ -84,7 +96,21 @@ function PlaylistInfo(props) {
       //console.log("track ids: "+ trackIds)
       getTracksAudioFeatures(trackIds);
     }
-  }, [playlist]);
+  };
+
+  useEffect(() => {
+    if (props.playlistId) {
+      setArtists(null);
+      setAudioFeatures(null);
+      setPlaylist(null);
+      setCombinedData(null);
+      getPlaylistinfo(props.playlistId);
+    }
+  }, [props.playlistId]);
+
+  useEffect(() => {
+    combineData();
+  }, [playlist, artists, audioFeatures]);
 
   return (
     <div className="Playlist">
@@ -103,16 +129,11 @@ function PlaylistInfo(props) {
         )}
       </div>
       <div className="SongBox">
-        {artists !== null && audioFeatures !== null
-          ? playlist?.tracks?.items.map((item, index) => (
-              <Track
-                key={item.track.id}
-                track={item.track}
-                artist={artists.artists[index]}
-                audioFeatures={audioFeatures.tracks[index]}
-              />
+        {combinedData !== null
+          ? combinedData?.playlist?.tracks?.items.map((item) => (
+              <Track key={item.id} track={item} />
             ))
-          : playlist?.tracks?.items.map((item) => (
+          : combinedData?.playlist?.tracks?.items.map((item) => (
               <div key={item.track.id}>Loading...</div>
             ))}
       </div>

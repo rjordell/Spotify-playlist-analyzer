@@ -1,13 +1,12 @@
-import React from 'react';
-import PlaylistInfo from './PlaylistInfo'
+import React from "react";
+import PlaylistInfo from "./PlaylistInfo";
 
-function MainBox() {
-    return (
-        <div className="MainBox">
-            <PlaylistInfo/>
-        </div>
-    );
+function MainBox({ selectedPlaylistId }) {
+  return (
+    <div className="MainBox">
+      <PlaylistInfo playlistId={selectedPlaylistId} />
+    </div>
+  );
 }
 
 export default MainBox;
-

@@ -11,14 +11,14 @@ function PlaylistInfo(props) {
 
   const getPlaylistinfo = async (id) => {
     try {
-      const response = await fetch("/auth/getAllPlaylistTracks/" + id);
+      const response = await fetch("/auth/getPlaylistInfo/" + id);
       const data = await response.json();
+      console.log(data);
       if (data.error) {
         setPlaylist(null);
       } else {
         setPlaylist(data);
       }
-      console.log(data);
     } catch (error) {
       console.error("Error retrieving playlist info:", error);
       setPlaylist(null);
@@ -64,38 +64,25 @@ function PlaylistInfo(props) {
   };
 
   const combineData = async () => {
-    if (playlist && artists && audioFeatures) {
-      const combinedTracks = playlist.tracks.items.map((item, index) => {
-        const trackWithArtist = {
-          ...item.track,
-          artists: [artists.artists[index]],
-          ...audioFeatures.tracks[index],
-        };
-        return trackWithArtist;
-      });
-      const updatedPlaylist = {
-        ...playlist,
-        tracks: {
-          ...playlist.tracks,
-          items: combinedTracks,
-        },
+    const combinedTracks = playlist.tracks.items.map((item, index) => {
+      const trackWithArtist = {
+        ...item.track,
+        artists: [artists.artists[index]],
+        ...audioFeatures.tracks[index],
       };
-      setCombinedData({
-        playlist: updatedPlaylist,
-      });
-      console.log(combinedData);
-    } else if (playlist) {
-      const artistIds = playlist.tracks.items
-        .map((item) => item.track.artists[0].id)
-        .join(",");
-      getArtistsInfo(artistIds);
-
-      const trackIds = playlist.tracks.items
-        .map((item) => item.track.id)
-        .join(",");
-      //console.log("track ids: "+ trackIds)
-      getTracksAudioFeatures(trackIds);
-    }
+      return trackWithArtist;
+    });
+    const updatedPlaylist = {
+      ...playlist,
+      tracks: {
+        ...playlist.tracks,
+        items: combinedTracks,
+      },
+    };
+    setCombinedData({
+      playlist: updatedPlaylist,
+    });
+    //console.log(combinedData);
   };
 
   useEffect(() => {
@@ -109,8 +96,25 @@ function PlaylistInfo(props) {
   }, [props.playlistId]);
 
   useEffect(() => {
-    combineData();
-  }, [playlist, artists, audioFeatures]);
+    if (playlist && artists && audioFeatures) {
+      combineData();
+    }
+  }, [artists, audioFeatures]);
+
+  useEffect(() => {
+    if (playlist) {
+      const artistIds = playlist.tracks.items
+        .map((item) => item.track.artists[0].id)
+        .join(",");
+      getArtistsInfo(artistIds);
+
+      const trackIds = playlist.tracks.items
+        .map((item) => item.track.id)
+        .join(",");
+      //console.log("track ids: "+ trackIds)
+      getTracksAudioFeatures(trackIds);
+    }
+  }, [playlist]);
 
   return (
     <div className="Playlist">
@@ -133,7 +137,7 @@ function PlaylistInfo(props) {
           ? combinedData?.playlist?.tracks?.items.map((item) => (
               <Track key={item.id} track={item} />
             ))
-          : combinedData?.playlist?.tracks?.items.map((item) => (
+          : playlist?.tracks?.items.map((item) => (
               <div key={item.track.id}>Loading...</div>
             ))}
       </div>

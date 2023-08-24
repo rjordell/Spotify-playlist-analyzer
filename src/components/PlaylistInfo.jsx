@@ -9,9 +9,10 @@ function PlaylistInfo(props) {
   const [audioFeatures, setAudioFeatures] = useState(null);
   const [combinedData, setCombinedData] = useState(null);
 
+  //gotta move batching to frontend
   const getPlaylistinfo = async (id) => {
     try {
-      const response = await fetch("/auth/getPlaylistInfo/" + id);
+      const response = await fetch("/auth/getPlaylistInfoOld/" + id);
       const data = await response.json();
       console.log(data);
       if (data.error) {

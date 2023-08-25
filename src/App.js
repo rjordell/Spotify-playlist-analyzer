@@ -25,6 +25,8 @@ function App() {
     return (
       <div className="App">
         <LeftBoxes onPlaylistClick={setSelectedPlaylistId} />
+        {console.log("selected palyist id")}
+        {console.log(selectedPlaylistId)}
         <MainBox selectedPlaylistId={selectedPlaylistId} />
         <WebPlayback token={token} />
       </div>

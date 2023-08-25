@@ -12,12 +12,13 @@ function PlaylistInfo(props) {
   //gotta move batching to frontend
   const getPlaylistinfo = async (id) => {
     try {
-      const response = await fetch("/auth/getPlaylistInfoOld/" + id);
+      const response = await fetch("/auth/getPlaylistInfo/" + id);
       const data = await response.json();
       console.log(data);
       if (data.error) {
         setPlaylist(null);
       } else {
+        console.log("got playlist info");
         setPlaylist(data);
       }
     } catch (error) {
@@ -105,7 +106,7 @@ function PlaylistInfo(props) {
   useEffect(() => {
     if (playlist) {
       const artistIds = playlist.tracks.items
-        .map((item) => item.track.artists[0].id)
+        .map((item) => (console.log(item), item.track.artists[0].id))
         .join(",");
       getArtistsInfo(artistIds);
 
@@ -135,12 +136,12 @@ function PlaylistInfo(props) {
       </div>
       <div className="SongBox">
         {combinedData !== null
-          ? combinedData?.playlist?.tracks?.items.map((item) => (
-              <Track key={item.id} track={item} />
-            ))
-          : playlist?.tracks?.items.map((item) => (
-              <div key={item.track.id}>Loading...</div>
-            ))}
+          ? combinedData?.playlist?.tracks?.items.map(
+              (item) => (
+                (<Track key={item.id} track={item} />), console.log(item)
+              )
+            )
+          : playlist?.tracks?.items.map((item) => <div>Loading...</div>)}
       </div>
     </div>
   );

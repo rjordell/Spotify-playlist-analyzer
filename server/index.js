@@ -53,27 +53,6 @@ app.get("/auth/login", (req, res) => {
   );
 });
 
-app.get("/auth/getPlaylistinfo/:id", (req, res) => {
-  const playlistId = req.params.id;
-
-  request.get(
-    `https://api.spotify.com/v1/playlists/${playlistId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-      },
-    },
-    (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        const playlistInfo = JSON.parse(body);
-        res.json(playlistInfo);
-      } else {
-        res.status(response.statusCode).json({ error: "Invalid playlist id" });
-      }
-    }
-  );
-});
-
 app.get("/auth/getUsersPlaylists/:id", (req, res) => {
   const userId = req.params.id;
   let allPlaylists = [];
@@ -179,47 +158,8 @@ app.get("/auth/getCurrentUsersPlaylists/", (req, res) => {
   );
 });
 
-app.get("/auth/getPlaylistInfo/:id", (req, res) => {
+app.get("/auth/getPlaylistinfo/:id", (req, res) => {
   const playlistId = req.params.id;
-
-  let allTracks = [];
-  let data = null;
-
-  const uniqueTrackIds = new Set();
-
-  const fetchTracks = (url) => {
-    request.get(
-      url,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      },
-      (error, response, body) => {
-        if (!error && response.statusCode === 200) {
-          const trackItems = JSON.parse(body);
-          const uniqueItems = trackItems.items.filter((item) => {
-            if (!uniqueTrackIds.has(item.track.id)) {
-              uniqueTrackIds.add(item.track.id);
-              return true;
-            }
-            return false;
-          });
-          allTracks = allTracks.concat(uniqueItems);
-          if (trackItems.next) {
-            fetchTracks(trackItems.next);
-          } else {
-            data.tracks.items = allTracks;
-            res.json(data);
-          }
-        } else {
-          res
-            .status(response.statusCode)
-            .json({ error: "Invalid playlist id" });
-        }
-      }
-    );
-  };
 
   request.get(
     `https://api.spotify.com/v1/playlists/${playlistId}`,
@@ -230,21 +170,8 @@ app.get("/auth/getPlaylistInfo/:id", (req, res) => {
     },
     (error, response, body) => {
       if (!error && response.statusCode === 200) {
-        data = JSON.parse(body);
-        const uniqueItems = data.tracks.items.filter((item) => {
-          if (!uniqueTrackIds.has(item.track.id)) {
-            uniqueTrackIds.add(item.track.id);
-            return true;
-          }
-          return false;
-        });
-        if (data.tracks.next) {
-          allTracks = allTracks.concat(uniqueItems);
-          fetchTracks(data.tracks.next);
-        } else {
-          data.tracks.items = allTracks;
-          res.json(data);
-        }
+        const playlistInfo = JSON.parse(body);
+        res.json(playlistInfo);
       } else {
         res.status(response.statusCode).json({ error: "Invalid playlist id" });
       }
@@ -252,7 +179,7 @@ app.get("/auth/getPlaylistInfo/:id", (req, res) => {
   );
 });
 
-app.get("/auth/getPlaylistInfoOld/:id", (req, res) => {
+app.get("/auth/getPlaylistInfoFull/:id", (req, res) => {
   const playlistId = req.params.id;
 
   let allTracks = [];

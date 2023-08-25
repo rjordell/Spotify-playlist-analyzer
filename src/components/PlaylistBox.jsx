@@ -1,24 +1,28 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import Track from "./Track";
+import InfoHeaderBox from "./InfoHeaderBox";
 import "../styles/DisplayPlaylistComponent.css";
 
-function PlaylistInfo(props) {
+function PlaylistBox({ selectedPlaylist }) {
+  console.log("selectedPlaylist from playlistInfo");
+  console.log(selectedPlaylist);
   const [playlist, setPlaylist] = useState(null);
   const [artists, setArtists] = useState(null);
   const [audioFeatures, setAudioFeatures] = useState(null);
   const [combinedData, setCombinedData] = useState(null);
+  const [filteredTracks, setFilteredTracks] = useState(null);
 
   //gotta move batching to frontend
   const getPlaylistinfo = async (id) => {
     try {
       const response = await fetch("/auth/getPlaylistInfo/" + id);
       const data = await response.json();
-      console.log(data);
+      //console.log(data);
       if (data.error) {
         setPlaylist(null);
       } else {
-        console.log("got playlist info");
+        //console.log("got playlist info");
         setPlaylist(data);
       }
     } catch (error) {
@@ -66,7 +70,11 @@ function PlaylistInfo(props) {
   };
 
   const combineData = async () => {
-    const combinedTracks = playlist.tracks.items.map((item, index) => {
+    //console.log("playlist");
+    //console.log(playlist);
+    //console.log("filteredTracks");
+    //console.log(filteredTracks);
+    const combinedTracks = filteredTracks.map((item, index) => {
       const trackWithArtist = {
         ...item.track,
         artists: [artists.artists[index]],
@@ -81,38 +89,47 @@ function PlaylistInfo(props) {
         items: combinedTracks,
       },
     };
-    setCombinedData({
-      playlist: updatedPlaylist,
-    });
-    //console.log(combinedData);
+    setCombinedData(updatedPlaylist);
+    //console.log("combinedData");
+    //console.log(playlist);
   };
 
   useEffect(() => {
-    if (props.playlistId) {
+    if (selectedPlaylist) {
+      console.log(selectedPlaylist);
       setArtists(null);
       setAudioFeatures(null);
       setPlaylist(null);
       setCombinedData(null);
-      getPlaylistinfo(props.playlistId);
+      getPlaylistinfo(selectedPlaylist.id);
     }
-  }, [props.playlistId]);
+  }, [selectedPlaylist]);
 
   useEffect(() => {
     if (playlist && artists && audioFeatures) {
       combineData();
+      //console.log("combinedData2?");
+      //console.log(combinedData);
     }
   }, [artists, audioFeatures]);
 
   useEffect(() => {
     if (playlist) {
-      const artistIds = playlist.tracks.items
-        .map((item) => (console.log(item), item.track.artists[0].id))
+      //console.log("old playlist");
+      //console.log(playlist);
+      const filteredTracks = playlist.tracks.items.filter(
+        (item) => item.track !== null && item.track.artists.length > 0
+      );
+      setFilteredTracks(filteredTracks);
+      //console.log("filtered tracks");
+      //console.log(filteredTracks);
+
+      const artistIds = filteredTracks
+        .map((item) => /*console.log(item),*/ item.track.artists[0].id)
         .join(",");
       getArtistsInfo(artistIds);
 
-      const trackIds = playlist.tracks.items
-        .map((item) => item.track.id)
-        .join(",");
+      const trackIds = filteredTracks.map((item) => item.track.id).join(",");
       //console.log("track ids: "+ trackIds)
       getTracksAudioFeatures(trackIds);
     }
@@ -120,31 +137,16 @@ function PlaylistInfo(props) {
 
   return (
     <div className="Playlist">
-      <div className="PlaylistInfo">
-        {playlist && (
-          <>
-            <img
-              src={playlist.images[0].url}
-              className="now-playing__cover"
-              alt=""
-            />
-            {playlist.name}
-            <br />
-            Followers: {playlist.followers.total}
-          </>
-        )}
-      </div>
+      <InfoHeaderBox playlist={selectedPlaylist} />
       <div className="SongBox">
         {combinedData !== null
-          ? combinedData?.playlist?.tracks?.items.map(
-              (item) => (
-                (<Track key={item.id} track={item} />), console.log(item)
-              )
-            )
+          ? combinedData?.tracks?.items.map((item) => (
+              <Track key={item.id} track={item} />
+            ))
           : playlist?.tracks?.items.map((item) => <div>Loading...</div>)}
       </div>
     </div>
   );
 }
 
-export default PlaylistInfo;
+export default PlaylistBox;

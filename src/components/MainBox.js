@@ -1,10 +1,12 @@
 import React from "react";
-import PlaylistInfo from "./PlaylistInfo";
+import PlaylistBox from "./PlaylistBox";
 
-function MainBox({ selectedPlaylistId }) {
+function MainBox({ selectedPlaylist }) {
+  console.log("selectedPlaylist from mainbox");
+  console.log(selectedPlaylist);
   return (
     <div className="MainBox">
-      {selectedPlaylistId && <PlaylistInfo playlistId={selectedPlaylistId} />}
+      {selectedPlaylist && <PlaylistBox selectedPlaylist={selectedPlaylist} />}
     </div>
   );
 }

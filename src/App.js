@@ -7,7 +7,9 @@ import "./styles/App.css";
 
 function App() {
   const [token, setToken] = useState("");
-  const [selectedPlaylistId, setSelectedPlaylistId] = useState(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  console.log("selectedPlaylist from app");
+  console.log(selectedPlaylist);
 
   useEffect(() => {
     async function getToken() {
@@ -24,10 +26,8 @@ function App() {
   } else {
     return (
       <div className="App">
-        <LeftBoxes onPlaylistClick={setSelectedPlaylistId} />
-        {console.log("selected palyist id")}
-        {console.log(selectedPlaylistId)}
-        <MainBox selectedPlaylistId={selectedPlaylistId} />
+        <LeftBoxes onPlaylistClick={setSelectedPlaylist} />
+        <MainBox selectedPlaylist={selectedPlaylist} />
         <WebPlayback token={token} />
       </div>
     );

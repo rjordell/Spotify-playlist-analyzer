@@ -1,10 +1,9 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import TrackBox from "./TrackBox";
-import InfoHeaderBox from "./InfoHeaderBox";
+import Track from "./Track";
 import "../styles/DisplayPlaylistComponent.css";
 
-function PlaylistBox({ selectedPlaylist }) {
+function TrackBox({ playlistId }) {
   //console.log("selectedPlaylist from playlistInfo");
   //console.log(selectedPlaylist);
   const [playlist, setPlaylist] = useState(null);
@@ -95,15 +94,15 @@ function PlaylistBox({ selectedPlaylist }) {
   };
 
   useEffect(() => {
-    if (selectedPlaylist) {
+    if (playlistId) {
       //console.log(selectedPlaylist);
       setArtists(null);
       setAudioFeatures(null);
       setPlaylist(null);
       setCombinedData(null);
-      getPlaylistinfo(selectedPlaylist.id);
+      getPlaylistinfo(playlistId);
     }
-  }, [selectedPlaylist]);
+  }, [playlistId]);
 
   useEffect(() => {
     if (playlist && artists && audioFeatures) {
@@ -136,11 +135,14 @@ function PlaylistBox({ selectedPlaylist }) {
   }, [playlist]);
 
   return (
-    <div className="Playlist">
-      <InfoHeaderBox playlist={selectedPlaylist} />
-      <TrackBox playlistId={selectedPlaylist.id} />
+    <div className="SongBox">
+      {combinedData !== null
+        ? combinedData?.tracks?.items.map((item) => (
+            <Track key={item.id} track={item} />
+          ))
+        : playlist?.tracks?.items.map((item) => <div>Loading...</div>)}
     </div>
   );
 }
 
-export default PlaylistBox;
+export default TrackBox;

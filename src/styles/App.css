@@ -178,9 +178,9 @@ body {
   font-size: 1.5vmin;
   height: 1.4vmax;
   width: 13.5vmax;
-  white-space: nowrap; /* Prevent text from wrapping */
-  overflow: hidden; /* Hide overflowed content */
-  text-overflow: ellipsis; /* Display an ellipsis (...) for clipped text */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .containerSubheader {
@@ -188,9 +188,9 @@ body {
   color: #aaa;
   height: 1vmax;
   width: 13.5vmax;
-  white-space: nowrap; /* Prevent text from wrapping */
-  overflow: hidden; /* Hide overflowed content */
-  text-overflow: ellipsis; /* Display an ellipsis (...) for clipped text */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .now-playing__status {

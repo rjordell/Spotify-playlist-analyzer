@@ -3,12 +3,12 @@ import { useState, useEffect } from "react";
 import Track from "./Track";
 import "../styles/DisplayPlaylistComponent.css";
 
-function TrackBox({ playlistId }) {
+function TrackBox({ playlistId, total }) {
   const [playlist, setPlaylist] = useState(null);
   const [artists, setArtists] = useState(null);
   const [audioFeatures, setAudioFeatures] = useState(null);
   const [combinedData, setCombinedData] = useState(null);
-  const [filteredTracks, setFilteredTracks] = useState(null);
+  const [filteredTracks, setFilteredTracks] = useState([]);
   const [numTracksFetched, setNumTracksFetched] = useState(0);
 
   const getPlaylistItems = async (url, allItems = []) => {
@@ -43,7 +43,10 @@ function TrackBox({ playlistId }) {
       if (data.error) {
         setArtists(null);
       } else {
-        setArtists(data);
+        setArtists((prevArtists) => ({
+          ...prevArtists,
+          artists: [...(prevArtists?.artists || []), ...data.artists],
+        }));
       }
     } catch (error) {
       console.error("Error retrieving artists info:", error);
@@ -60,7 +63,10 @@ function TrackBox({ playlistId }) {
       if (data.error) {
         setAudioFeatures(null);
       } else {
-        setAudioFeatures(data);
+        setAudioFeatures((prevAudioFeatures) => ({
+          ...prevAudioFeatures,
+          tracks: [...(prevAudioFeatures?.tracks || []), ...data.tracks],
+        }));
       }
     } catch (error) {
       console.error("Error retrieving tracks audio features:", error);
@@ -69,7 +75,7 @@ function TrackBox({ playlistId }) {
   };
 
   const combineData = async () => {
-    if (filteredTracks && artists && audioFeatures) {
+    if (artists && audioFeatures) {
       const combinedTracks = filteredTracks.map((item, index) => {
         const trackWithArtist = {
           ...item.track,
@@ -78,19 +84,11 @@ function TrackBox({ playlistId }) {
         };
         return trackWithArtist;
       });
-      if (combinedData) {
-        const updatedItems = [...combinedData.items, ...combinedTracks];
-        const updatedPlaylist = {
-          ...combinedData,
-          items: updatedItems,
-        };
-        setCombinedData(updatedPlaylist);
-      } else {
-        const updatedPlaylist = {
-          items: combinedTracks,
-        };
-        setCombinedData(updatedPlaylist);
-      }
+      const updatedPlaylist = {
+        ...playlist,
+        items: combinedTracks,
+      };
+      setCombinedData(updatedPlaylist);
     }
   };
 
@@ -99,6 +97,7 @@ function TrackBox({ playlistId }) {
       setArtists(null);
       setAudioFeatures(null);
       setPlaylist(null);
+      setFilteredTracks([]);
       setCombinedData(null);
       setNumTracksFetched(0);
       getPlaylistItems(
@@ -109,19 +108,21 @@ function TrackBox({ playlistId }) {
 
   useEffect(() => {
     if (playlist) {
-      console.log(playlist);
+      //console.log(playlist);
       const newTracks = playlist.items.slice(numTracksFetched);
-      const filteredTracks = newTracks.filter(
+      const filteredNewTracks = newTracks.filter(
         (item) => item.track !== null && item.track.artists.length > 0
       );
-      setFilteredTracks(filteredTracks);
 
-      const artistIds = filteredTracks
+      const updatedFilteredTracks = [...filteredTracks, ...filteredNewTracks];
+      setFilteredTracks(updatedFilteredTracks);
+
+      const artistIds = filteredNewTracks
         .map((item) => item.track.artists[0].id)
         .join(",");
       getArtistsInfo(artistIds);
 
-      const trackIds = filteredTracks.map((item) => item.track.id).join(",");
+      const trackIds = filteredNewTracks.map((item) => item.track.id).join(",");
       getTracksAudioFeatures(trackIds);
 
       setNumTracksFetched(playlist.items.length);
@@ -130,12 +131,18 @@ function TrackBox({ playlistId }) {
 
   useEffect(() => {
     combineData();
-  }, [filteredTracks, artists, audioFeatures]);
+  }, [artists, audioFeatures]);
 
   return (
-    <div className="SongBox">
-      {console.log("cmbned data")}
+    <div className="TrackBox">
+      {console.log("audio features")}
+      {console.log(audioFeatures)}
+      {console.log("artists")}
+      {console.log(artists)}
+      {console.log("combined data")}
       {console.log(combinedData)}
+      {console.log("filtered tracks")}
+      {console.log(filteredTracks)}
       {console.log("playlist")}
       {console.log(playlist)}
       {combinedData?.items.map((item) => (

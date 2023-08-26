@@ -5,11 +5,14 @@ import InfoHeaderBox from "./InfoHeaderBox";
 import "../styles/DisplayPlaylistComponent.css";
 
 function PlaylistBox({ selectedPlaylist }) {
-  //console.log(selectedPlaylist);
+  console.log(selectedPlaylist);
   return (
     <div className="Playlist">
       <InfoHeaderBox playlist={selectedPlaylist} />
-      <TrackBox playlistId={selectedPlaylist.id} />
+      <TrackBox
+        playlistId={selectedPlaylist.id}
+        total={selectedPlaylist.tracks.total}
+      />
     </div>
   );
 }

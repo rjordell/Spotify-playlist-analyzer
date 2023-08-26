@@ -2,7 +2,8 @@ import React from "react";
 
 function Playlist(props) {
   const handleClick = () => {
-    props.onClick(props.playlist.id);
+    console.log(props.playlist);
+    props.onClick(props.playlist);
   };
   return (
     <div className="playlistContainer" onClick={handleClick}>

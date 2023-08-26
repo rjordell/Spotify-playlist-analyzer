@@ -16,8 +16,8 @@ function UserPlaylistsBox({ onPlaylistClick }) {
       } else {
         setPlaylists(data);
       }
-      console.log("current users playlsits");
-      console.log(data);
+      //console.log("current users playlsits");
+      //console.log(data);
     } catch (error) {
       console.error("Error retrieving current user's playlists:", error);
       setPlaylists(null);
@@ -33,7 +33,7 @@ function UserPlaylistsBox({ onPlaylistClick }) {
       } else {
         setPlaylists(data);
       }
-      console.log(data);
+      //console.log(data);
     } catch (error) {
       console.error("Error retrieving user's playlists:", error);
       setPlaylists(null);

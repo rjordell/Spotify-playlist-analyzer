@@ -53,27 +53,6 @@ app.get("/auth/login", (req, res) => {
   );
 });
 
-app.get("/auth/getPlaylistinfo/:id", (req, res) => {
-  const playlistId = req.params.id;
-
-  request.get(
-    `https://api.spotify.com/v1/playlists/${playlistId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-      },
-    },
-    (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        const playlistInfo = JSON.parse(body);
-        res.json(playlistInfo);
-      } else {
-        res.status(response.statusCode).json({ error: "Invalid playlist id" });
-      }
-    }
-  );
-});
-
 app.get("/auth/getUsersPlaylists/:id", (req, res) => {
   const userId = req.params.id;
   let allPlaylists = [];
@@ -179,7 +158,50 @@ app.get("/auth/getCurrentUsersPlaylists/", (req, res) => {
   );
 });
 
-app.get("/auth/getAllPlaylistTracks/:id", (req, res) => {
+app.get("/auth/getPlaylistItems/:id", (req, res) => {
+  const playlistId = req.params.id;
+  const { offset, limit } = req.query;
+
+  request.get(
+    `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=${limit}&offset=${offset}`,
+    {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    },
+    (error, response, body) => {
+      if (!error && response.statusCode === 200) {
+        const playlistInfo = JSON.parse(body);
+        res.json(playlistInfo);
+      } else {
+        res.status(response.statusCode).json({ error: "Invalid playlist id" });
+      }
+    }
+  );
+});
+
+app.get("/auth/getPlaylistinfo/:id", (req, res) => {
+  const playlistId = req.params.id;
+
+  request.get(
+    `https://api.spotify.com/v1/playlists/${playlistId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    },
+    (error, response, body) => {
+      if (!error && response.statusCode === 200) {
+        const playlistInfo = JSON.parse(body);
+        res.json(playlistInfo);
+      } else {
+        res.status(response.statusCode).json({ error: "Invalid playlist id" });
+      }
+    }
+  );
+});
+
+app.get("/auth/getPlaylistInfoFull/:id", (req, res) => {
   const playlistId = req.params.id;
 
   let allTracks = [];

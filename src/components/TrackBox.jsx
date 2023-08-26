@@ -9,8 +9,8 @@ function TrackBox({ playlistId }) {
   const [audioFeatures, setAudioFeatures] = useState(null);
   const [combinedData, setCombinedData] = useState(null);
   const [filteredTracks, setFilteredTracks] = useState(null);
+  const [numTracksFetched, setNumTracksFetched] = useState(0);
 
-  //gotta move batching to frontend
   const getPlaylistItems = async (url, allItems = []) => {
     try {
       const response = await fetch(url);
@@ -69,19 +69,29 @@ function TrackBox({ playlistId }) {
   };
 
   const combineData = async () => {
-    const combinedTracks = filteredTracks.map((item, index) => {
-      const trackWithArtist = {
-        ...item.track,
-        artists: [artists.artists[index]],
-        ...audioFeatures.tracks[index],
-      };
-      return trackWithArtist;
-    });
-    const updatedPlaylist = {
-      ...playlist,
-      items: combinedTracks,
-    };
-    setCombinedData(updatedPlaylist);
+    if (filteredTracks && artists && audioFeatures) {
+      const combinedTracks = filteredTracks.map((item, index) => {
+        const trackWithArtist = {
+          ...item.track,
+          artists: [artists.artists[index]],
+          ...audioFeatures.tracks[index],
+        };
+        return trackWithArtist;
+      });
+      if (combinedData) {
+        const updatedItems = [...combinedData.items, ...combinedTracks];
+        const updatedPlaylist = {
+          ...combinedData,
+          items: updatedItems,
+        };
+        setCombinedData(updatedPlaylist);
+      } else {
+        const updatedPlaylist = {
+          items: combinedTracks,
+        };
+        setCombinedData(updatedPlaylist);
+      }
+    }
   };
 
   useEffect(() => {
@@ -90,6 +100,7 @@ function TrackBox({ playlistId }) {
       setAudioFeatures(null);
       setPlaylist(null);
       setCombinedData(null);
+      setNumTracksFetched(0);
       getPlaylistItems(
         `/auth/getPlaylistItems/${playlistId}?limit=100&offset=0`
       );
@@ -97,15 +108,10 @@ function TrackBox({ playlistId }) {
   }, [playlistId]);
 
   useEffect(() => {
-    if (playlist && artists && audioFeatures) {
-      combineData();
-    }
-  }, [artists, audioFeatures]);
-
-  useEffect(() => {
     if (playlist) {
       console.log(playlist);
-      const filteredTracks = playlist.items.filter(
+      const newTracks = playlist.items.slice(numTracksFetched);
+      const filteredTracks = newTracks.filter(
         (item) => item.track !== null && item.track.artists.length > 0
       );
       setFilteredTracks(filteredTracks);
@@ -117,8 +123,14 @@ function TrackBox({ playlistId }) {
 
       const trackIds = filteredTracks.map((item) => item.track.id).join(",");
       getTracksAudioFeatures(trackIds);
+
+      setNumTracksFetched(playlist.items.length);
     }
   }, [playlist]);
+
+  useEffect(() => {
+    combineData();
+  }, [filteredTracks, artists, audioFeatures]);
 
   return (
     <div className="SongBox">

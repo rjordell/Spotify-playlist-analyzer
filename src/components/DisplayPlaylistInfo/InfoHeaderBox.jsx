@@ -1,6 +1,4 @@
 import React from "react";
-import { useState, useEffect } from "react";
-import "../styles/DisplayPlaylistComponent.css";
 
 function InfoHeaderBox({ playlist }) {
   return (

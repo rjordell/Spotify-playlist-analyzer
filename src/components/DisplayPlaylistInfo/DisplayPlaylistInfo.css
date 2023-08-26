@@ -53,6 +53,14 @@
   background-color: #111;
 }
 
+.main-container.tracks {
+  width: 79.7vw;
+}
+
+.container.track {
+  width: 79.4vw;
+}
+
 .trackContainer {
   align-items: center;
   padding: 0.4vmax;
@@ -78,6 +86,6 @@
 }
 
 .everythingElse {
-  width: 80%;
+  width: 61vw;
   display: flex;
 }

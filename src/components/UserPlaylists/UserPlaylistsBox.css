@@ -57,12 +57,20 @@
   background-color: #111;
 }
 
+.main-container.playlists {
+  width: 18.7vw;
+}
+
+.container.playlist {
+  width: 18.4vw;
+}
+
 .playlistContainer {
   align-items: center;
   padding: 0.4vmax;
   padding-right: 0;
   display: flex;
-  width: 18vw;
+  width: 17.9vw;
   height: 3.3vmax;
   justify-content: stretch;
   text-align: left;

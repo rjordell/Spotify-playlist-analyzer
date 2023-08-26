@@ -1,8 +1,7 @@
 import React from "react";
-import { useState, useEffect } from "react";
 import TrackBox from "./TrackBox";
 import InfoHeaderBox from "./InfoHeaderBox";
-import "../styles/DisplayPlaylistComponent.css";
+import "./DisplayPlaylistInfo.css";
 
 function PlaylistBox({ selectedPlaylist }) {
   console.log(selectedPlaylist);

@@ -1,7 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import Track from "./Track";
-import "../styles/DisplayPlaylistComponent.css";
 
 function TrackBox({ playlistId, total }) {
   const [playlist, setPlaylist] = useState(null);
@@ -134,7 +133,7 @@ function TrackBox({ playlistId, total }) {
   }, [artists, audioFeatures]);
 
   return (
-    <div className="TrackBox">
+    <div className="main-container tracks">
       {console.log("audio features")}
       {console.log(audioFeatures)}
       {console.log("artists")}

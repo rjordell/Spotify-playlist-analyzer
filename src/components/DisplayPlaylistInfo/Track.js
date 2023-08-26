@@ -5,7 +5,7 @@ function Track({ track }) {
   //console.log(track);
   if (track.artists[0] && track.tempo !== undefined) {
     return (
-      <div className="trackContainer">
+      <div className="container track">
         <div className="imageAndTitle">
           <div className="imageCovers">
             <img

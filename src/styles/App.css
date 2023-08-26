@@ -162,22 +162,58 @@ body {
   justify-content: center;
 }
 
-.container {
-  align-items: center;
+.main-container {
   display: flex;
-  justify-content: center;
-  height: 100%;
+  overflow-y: hidden;
+  margin: 0.3vmax;
+  margin-right: 0;
+  height: 68.5vh;
+  justify-content: left;
   flex-direction: column;
+  border-radius: 0px 0px 10px 10px;
+  font-size: 1.5vmin;
+  scrollbar-width: thin;
+  scrollbar-color: #282c34 #111;
 }
 
-.main-container {
-  flex: 1;
+.main-container:hover {
+  overflow-y: scroll;
+}
+
+.main-container::-webkit-scrollbar {
+  width: 0.3vmax;
+}
+
+.main-container::-webkit-scrollbar-thumb {
+  background-color: #282c34;
+  border-radius: 3px;
+}
+
+.main-container::-webkit-scrollbar-track {
+  background-color: #111;
+}
+
+.container {
+  align-items: center;
+  padding: 0.4vmax;
+  padding-right: 0;
+  display: flex;
+  height: 3.3vmax;
+  justify-content: stretch;
+  text-align: left;
+  border-radius: 5px;
+  flex-direction: row;
+}
+
+.container:hover {
+  background-color: #222;
+  cursor: pointer;
 }
 
 .containerHeader {
   font-size: 1.5vmin;
   height: 1.4vmax;
-  width: 13.5vmax;
+  width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -187,7 +223,7 @@ body {
   font-size: 1.2vmin;
   color: #aaa;
   height: 1vmax;
-  width: 13.5vmax;
+  width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -204,7 +240,7 @@ body {
 
 .imageAndTitle {
   display: flex;
-  width: 17.5vw;
+  width: 18vw;
   height: 2.5vmax;
   justify-content: left;
   text-align: left;
@@ -220,7 +256,7 @@ body {
 
 .now-playing__side {
   height: 2.5vmax;
-  width: 13.5vw;
+  width: 15vw;
   margin-left: 0.5vmax;
   display: flex;
   flex-direction: column;

@@ -6,7 +6,7 @@ function Playlist(props) {
     props.onClick(props.playlist);
   };
   return (
-    <div className="playlistContainer" onClick={handleClick}>
+    <div className="container playlist" onClick={handleClick}>
       <div className="imageAndTitle">
         <div className="imageCovers">
           <img

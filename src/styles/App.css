@@ -179,17 +179,17 @@ body {
   height: 1.4vmax;
   width: 13.5vmax;
   white-space: nowrap; /* Prevent text from wrapping */
-  overflow-x: hidden; /* Hide overflowed content */
+  overflow: hidden; /* Hide overflowed content */
   text-overflow: ellipsis; /* Display an ellipsis (...) for clipped text */
 }
 
 .containerSubheader {
   font-size: 1.2vmin;
   color: #aaa;
-  height: 0.9vmax;
+  height: 1vmax;
   width: 13.5vmax;
   white-space: nowrap; /* Prevent text from wrapping */
-  overflow-x: hidden; /* Hide overflowed content */
+  overflow: hidden; /* Hide overflowed content */
   text-overflow: ellipsis; /* Display an ellipsis (...) for clipped text */
 }
 

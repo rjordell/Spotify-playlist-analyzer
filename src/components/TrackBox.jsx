@@ -4,8 +4,6 @@ import Track from "./Track";
 import "../styles/DisplayPlaylistComponent.css";
 
 function TrackBox({ playlistId }) {
-  //console.log("selectedPlaylist from playlistInfo");
-  //console.log(selectedPlaylist);
   const [playlist, setPlaylist] = useState(null);
   const [artists, setArtists] = useState(null);
   const [audioFeatures, setAudioFeatures] = useState(null);
@@ -13,19 +11,27 @@ function TrackBox({ playlistId }) {
   const [filteredTracks, setFilteredTracks] = useState(null);
 
   //gotta move batching to frontend
-  const getPlaylistinfo = async (id) => {
+  const getPlaylistItems = async (url, allItems = []) => {
     try {
-      const response = await fetch("/auth/getPlaylistInfoFull/" + id);
+      const response = await fetch(url);
       const data = await response.json();
-      //console.log(data);
       if (data.error) {
         setPlaylist(null);
       } else {
-        //console.log("got playlist info");
-        setPlaylist(data);
+        const updatedItems = [...allItems, ...data.items];
+        setPlaylist({ items: updatedItems });
+        if (data.next) {
+          // If there's a "next" page, recursively fetch it
+          getPlaylistItems(
+            `/auth/getPlaylistItems/${playlistId}?limit=100&offset=${
+              data.offset + 100
+            }`,
+            updatedItems
+          );
+        }
       }
     } catch (error) {
-      console.error("Error retrieving playlist info:", error);
+      console.error("Error retrieving playlist items:", error);
       setPlaylist(null);
     }
   };
@@ -38,10 +44,7 @@ function TrackBox({ playlistId }) {
         setArtists(null);
       } else {
         setArtists(data);
-        //console.log("set data for artists")
       }
-      //console.log(data);
-      //console.log(artists);
     } catch (error) {
       console.error("Error retrieving artists info:", error);
       setArtists(null);
@@ -58,10 +61,7 @@ function TrackBox({ playlistId }) {
         setAudioFeatures(null);
       } else {
         setAudioFeatures(data);
-        //console.log("set data for audio features")
       }
-      //console.log(data);
-      //console.log(audioFeatures);
     } catch (error) {
       console.error("Error retrieving tracks audio features:", error);
       setAudioFeatures(null);
@@ -69,10 +69,6 @@ function TrackBox({ playlistId }) {
   };
 
   const combineData = async () => {
-    //console.log("playlist");
-    //console.log(playlist);
-    //console.log("filteredTracks");
-    //console.log(filteredTracks);
     const combinedTracks = filteredTracks.map((item, index) => {
       const trackWithArtist = {
         ...item.track,
@@ -83,64 +79,56 @@ function TrackBox({ playlistId }) {
     });
     const updatedPlaylist = {
       ...playlist,
-      tracks: {
-        ...playlist.tracks,
-        items: combinedTracks,
-      },
+      items: combinedTracks,
     };
     setCombinedData(updatedPlaylist);
-    //console.log("combinedData");
-    //console.log(playlist);
   };
 
   useEffect(() => {
     if (playlistId) {
-      //console.log(selectedPlaylist);
       setArtists(null);
       setAudioFeatures(null);
       setPlaylist(null);
       setCombinedData(null);
-      getPlaylistinfo(playlistId);
+      getPlaylistItems(
+        `/auth/getPlaylistItems/${playlistId}?limit=100&offset=0`
+      );
     }
   }, [playlistId]);
 
   useEffect(() => {
     if (playlist && artists && audioFeatures) {
       combineData();
-      //console.log("combinedData2?");
-      //console.log(combinedData);
     }
   }, [artists, audioFeatures]);
 
   useEffect(() => {
     if (playlist) {
-      //console.log("old playlist");
-      //console.log(playlist);
-      const filteredTracks = playlist.tracks.items.filter(
+      console.log(playlist);
+      const filteredTracks = playlist.items.filter(
         (item) => item.track !== null && item.track.artists.length > 0
       );
       setFilteredTracks(filteredTracks);
-      //console.log("filtered tracks");
-      //console.log(filteredTracks);
 
       const artistIds = filteredTracks
-        .map((item) => /*console.log(item),*/ item.track.artists[0].id)
+        .map((item) => item.track.artists[0].id)
         .join(",");
       getArtistsInfo(artistIds);
 
       const trackIds = filteredTracks.map((item) => item.track.id).join(",");
-      //console.log("track ids: "+ trackIds)
       getTracksAudioFeatures(trackIds);
     }
   }, [playlist]);
 
   return (
     <div className="SongBox">
-      {combinedData !== null
-        ? combinedData?.tracks?.items.map((item) => (
-            <Track key={item.id} track={item} />
-          ))
-        : playlist?.tracks?.items.map((item) => <div>Loading...</div>)}
+      {console.log("cmbned data")}
+      {console.log(combinedData)}
+      {console.log("playlist")}
+      {console.log(playlist)}
+      {combinedData?.items.map((item) => (
+        <Track key={item.track} track={item} />
+      ))}
     </div>
   );
 }

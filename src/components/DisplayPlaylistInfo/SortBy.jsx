@@ -1,6 +1,6 @@
 import React from "react";
 
-function SortBy() {
+function SortBy({ setCombinedData, combinedData }) {
   const handleSortChange = (e) => {
     const selectedOption = e.target.value;
 

@@ -2,11 +2,10 @@ import React from "react";
 import { useState, useEffect } from "react";
 import Track from "./Track";
 
-function TrackBox({ playlistId, total }) {
+function TrackBox({ playlistId, total, setCombinedData, combinedData }) {
   const [playlist, setPlaylist] = useState(null);
   const [artists, setArtists] = useState(null);
   const [audioFeatures, setAudioFeatures] = useState(null);
-  const [combinedData, setCombinedData] = useState(null);
   const [filteredTracks, setFilteredTracks] = useState([]);
   const [numTracksFetched, setNumTracksFetched] = useState(0);
 

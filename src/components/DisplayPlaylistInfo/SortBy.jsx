@@ -12,6 +12,10 @@ function SortBy({ setCombinedData, combinedData }) {
           return a.album.name.localeCompare(b.album.name);
         case "artists":
           return a.artists[0].name.localeCompare(b.artists[0].name);
+        case "artist_followers":
+          return b.artists[0].followers.total - a.artists[0].followers.total;
+        case "artist_popularity":
+          return b.artists[0].popularity - a.artists[0].popularity;
         case "danceability":
           return a.danceability - b.danceability;
         case "duration_ms":
@@ -32,8 +36,6 @@ function SortBy({ setCombinedData, combinedData }) {
           return a.name.localeCompare(b.name);
         case "song_popularity":
           return b.popularity - a.popularity;
-        case "artist_popularity":
-          return b.artists[0].popularity - a.artists[0].popularity;
         case "speechiness":
           return a.speechiness - b.speechiness;
         case "tempo":
@@ -55,6 +57,8 @@ function SortBy({ setCombinedData, combinedData }) {
         <option value="acousticness">Acousticness</option>
         <option value="album">Album</option>
         <option value="artists">Artists</option>
+        <option value="artist_followers">Artist Followers</option>
+        <option value="artist_popularity">Artist Popularity</option>
         <option value="danceability">Danceability</option>
         <option value="duration_ms">Duration (ms)</option>
         <option value="energy">Energy</option>
@@ -65,7 +69,6 @@ function SortBy({ setCombinedData, combinedData }) {
         <option value="mode">Mode</option>
         <option value="name">Name</option>
         <option value="song_popularity">Song Popularity</option>
-        <option value="artist_popularity">Artist Popularity</option>
         <option value="speechiness">Speechiness</option>
         <option value="tempo">Tempo</option>
         <option value="time_signature">Time Signature</option>

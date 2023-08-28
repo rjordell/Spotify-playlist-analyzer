@@ -1,6 +1,6 @@
 import React from "react";
 import GoToMainMenuBox from "./GoToMainMenuBox";
-import UserPlaylistsBox from "./UserPlaylistsBox";
+import UserPlaylistsBox from "./UserPlaylists/UserPlaylistsBox";
 
 function LeftBoxes({ onPlaylistClick }) {
   return (

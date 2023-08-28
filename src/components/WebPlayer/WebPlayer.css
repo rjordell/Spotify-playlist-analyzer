@@ -1,0 +1,10 @@
+.coverImg.player {
+  border-radius: 5px;
+  width: 3vmax;
+  height: 3vmax;
+}
+
+.everythingElse {
+  width: 61vw;
+  display: flex;
+}

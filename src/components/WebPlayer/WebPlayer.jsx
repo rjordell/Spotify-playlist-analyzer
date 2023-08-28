@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "./WebPlayer.css";
 
 const track = {
   name: "",
@@ -8,7 +9,7 @@ const track = {
   artists: [{ name: "" }],
 };
 
-function WebPlayback(props) {
+function WebPlayer(props) {
   const [is_paused, setPaused] = useState(false);
   const [is_active, setActive] = useState(false);
   const [player, setPlayer] = useState(undefined);
@@ -72,7 +73,7 @@ function WebPlayback(props) {
           <div className="webPlayerBox">
             <img
               src={current_track.album.images[0].url}
-              className="now-playing__cover"
+              className="coverImg player"
               alt=""
             />
             <div className="now-playing__side">
@@ -114,4 +115,4 @@ function WebPlayback(props) {
   }
 }
 
-export default WebPlayback;
+export default WebPlayer;

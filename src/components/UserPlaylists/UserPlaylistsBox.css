@@ -1,0 +1,44 @@
+.UserInfo {
+  padding: 0.5em;
+  align-items: center;
+  display: flex;
+  height: 9vh;
+  justify-content: left;
+  position: relative;
+  width: 100%;
+  z-index: 1;
+  text-align: left;
+  flex-direction: row;
+  border-radius: 10px 10px 0px 0px;
+}
+
+.UserPlaylistsBox {
+  height: 78vh;
+  display: flex;
+  align-items: center;
+  width: 19vw;
+  flex-direction: column;
+  font-size: 2.5vmin;
+  background-color: #111;
+  border-radius: 10px;
+}
+
+.main-container.playlists {
+  width: 18.7vw;
+}
+
+.container.playlist {
+  width: 18.4vw;
+}
+
+.coverImg.playlist {
+  border-radius: 5px;
+}
+
+.playlists_cover {
+  border-radius: 5px;
+  float: left;
+  text-align: right;
+  width: 2.5vmax;
+  height: 2.5vmax;
+}

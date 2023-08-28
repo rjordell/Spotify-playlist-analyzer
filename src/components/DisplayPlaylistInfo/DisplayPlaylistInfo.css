@@ -1,0 +1,43 @@
+.Playlist {
+  display: flex;
+  align-items: center;
+  width: 80vw;
+  height: 89vh;
+  flex-direction: column;
+  font-size: 2.5vmin;
+}
+
+.main-container.tracks {
+  width: 79.7vw;
+}
+
+.container.track {
+  width: 79.4vw;
+}
+
+.main-container.playlistInfo {
+  width: 100%;
+  height: 20vh;
+  flex-direction: row;
+  background-color: #222;
+  margin: 0;
+  border-radius: 10px 10px 0px 0px;
+  align-items: center;
+}
+
+.container.playlistInfo {
+  width: 79.4vw;
+}
+
+.coverImg.track {
+  border-radius: 0px;
+}
+
+.coverImg.playlistInfo {
+  border-radius: 0px;
+}
+
+.everythingElse {
+  width: 61vw;
+  display: flex;
+}

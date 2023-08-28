@@ -1,5 +1,5 @@
 import React from "react";
-import PlaylistBox from "./PlaylistBox";
+import PlaylistBox from "./DisplayPlaylistInfo/DisplayPlaylistInfo";
 
 function MainBox({ selectedPlaylist }) {
   //console.log("selectedPlaylist from mainbox");

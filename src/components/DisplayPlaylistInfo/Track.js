@@ -5,15 +5,14 @@ function Track({ track }) {
   //console.log(track);
   if (track.artists[0] && track.tempo !== undefined) {
     return (
-      <div className="trackContainer">
+      <div className="container track">
         <div className="imageAndTitle">
-          <div className="imageCovers">
-            <img
-              src={track.album.images[0].url}
-              className="track_cover"
-              alt=""
-            />
-          </div>
+          <img
+            src={track.album.images[0].url}
+            className="coverImg track"
+            alt=""
+          />
+
           <div className="now-playing__side">
             <div className="containerHeader">{track.name}</div>
             <div className="containerSubheader">{track.artists[0].name}</div>
@@ -48,7 +47,6 @@ function Track({ track }) {
       </div>
     );
   } else {
-    // Render "Loading..." if data is missing
     return <div>Loading...</div>;
   }
 }

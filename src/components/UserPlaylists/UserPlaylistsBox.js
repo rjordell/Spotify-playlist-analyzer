@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import Playlist from "./Playlist";
-import "../styles/UserPlaylistsBox.css";
+import "./UserPlaylistsBox.css";
 
 function UserPlaylistsBox({ onPlaylistClick }) {
   const [inputValue, setInputValue] = useState("");
@@ -61,7 +61,7 @@ function UserPlaylistsBox({ onPlaylistClick }) {
           Get info
         </button>
       </div>
-      <div className="PlaylistsBox">
+      <div className="main-container playlists">
         {playlists !== null ? (
           playlists?.items.map((item) => (
             <Playlist key={item.id} playlist={item} onClick={onPlaylistClick} />

@@ -52,8 +52,8 @@ function SortBy({ setCombinedData, combinedData }) {
   };
   return (
     <div className="sort-dropdown">
-      <label htmlFor="sort">Sort By:</label>
       <select id="sort" onChange={handleSortChange}>
+        <option value="original">Original Order</option>
         <option value="acousticness">Acousticness</option>
         <option value="album">Album</option>
         <option value="artists">Artists</option>

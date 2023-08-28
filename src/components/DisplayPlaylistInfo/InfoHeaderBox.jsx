@@ -2,11 +2,22 @@ import React from "react";
 
 function InfoHeaderBox({ playlist }) {
   return (
-    <div className="PlaylistInfo">
-      <img src={playlist.images[0].url} className="now-playing__cover" alt="" />
-      {playlist.name}
-      <br />
-      Songs: {playlist.tracks.total}
+    <div className="main-container playlistInfo">
+      <div className="container track">
+        <div className="imageAndTitle">
+          <img
+            src={playlist.images[0].url}
+            className="coverImg playlistInfo"
+            alt=""
+          />
+          <div className="now-playing__side">
+            <div className="containerHeader">{playlist.name}</div>
+            <div className="containerSubheader">
+              {playlist.tracks.total} Songs
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

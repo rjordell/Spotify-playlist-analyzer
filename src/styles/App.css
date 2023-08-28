@@ -167,6 +167,7 @@ body {
   overflow-y: hidden;
   margin: 0.3vmax;
   margin-right: 0;
+  margin-bottom: 0;
   height: 68.5vh;
   justify-content: left;
   flex-direction: column;
@@ -195,10 +196,10 @@ body {
 
 .container {
   align-items: center;
-  padding: 0.4vmax;
+  padding: 0.3vmax;
   padding-right: 0;
   display: flex;
-  height: 3.3vmax;
+  height: 3.1vmax;
   justify-content: stretch;
   text-align: left;
   border-radius: 5px;
@@ -233,30 +234,22 @@ body {
   margin-bottom: 1em;
 }
 
-.imageCovers {
-  width: 2.5vmax;
-  height: 2.5vmax;
-}
-
 .imageAndTitle {
   display: flex;
-  width: 18vw;
+  width: 18.1vw;
   height: 2.5vmax;
   justify-content: left;
   text-align: left;
 }
 
-.now-playing__cover {
-  border-radius: 5px;
-  float: left;
-  text-align: right;
-  width: 60px;
-  height: 60px;
+.coverImg {
+  width: 2.5vmax;
+  height: 2.5vmax;
 }
 
 .now-playing__side {
   height: 2.5vmax;
-  width: 15vw;
+  width: 15.1vw;
   margin-left: 0.5vmax;
   display: flex;
   flex-direction: column;

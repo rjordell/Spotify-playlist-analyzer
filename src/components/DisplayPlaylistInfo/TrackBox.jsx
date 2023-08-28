@@ -134,6 +134,7 @@ function TrackBox({ playlistId, total }) {
 
   return (
     <div className="main-container tracks">
+      {console.log(combinedData)}
       {combinedData?.items.map((item) => (
         <Track key={item.track} track={item} />
       ))}

@@ -7,21 +7,6 @@
   font-size: 2.5vmin;
 }
 
-.PlaylistInfo {
-  padding: 0.5em;
-  align-items: center;
-  display: flex;
-  height: 20vh;
-  justify-content: left;
-  position: relative;
-  width: 100%;
-  z-index: 1;
-  text-align: left;
-  flex-direction: row;
-  background-color: #222;
-  border-radius: 10px 10px 0px 0px;
-}
-
 .main-container.tracks {
   width: 79.7vw;
 }
@@ -30,12 +15,26 @@
   width: 79.4vw;
 }
 
-.track_cover {
+.main-container.playlistInfo {
+  width: 100%;
+  height: 20vh;
+  flex-direction: row;
+  background-color: #222;
+  margin: 0;
+  border-radius: 10px 10px 0px 0px;
+  align-items: center;
+}
+
+.container.playlistInfo {
+  width: 79.4vw;
+}
+
+.coverImg.track {
   border-radius: 0px;
-  float: left;
-  text-align: right;
-  width: 2.5vmax;
-  height: 2.5vmax;
+}
+
+.coverImg.playlistInfo {
+  border-radius: 0px;
 }
 
 .everythingElse {

@@ -7,13 +7,12 @@ function Track({ track }) {
     return (
       <div className="container track">
         <div className="imageAndTitle">
-          <div className="imageCovers">
-            <img
-              src={track.album.images[0].url}
-              className="track_cover"
-              alt=""
-            />
-          </div>
+          <img
+            src={track.album.images[0].url}
+            className="coverImg track"
+            alt=""
+          />
+
           <div className="now-playing__side">
             <div className="containerHeader">{track.name}</div>
             <div className="containerSubheader">{track.artists[0].name}</div>

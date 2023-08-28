@@ -31,6 +31,10 @@
   width: 18.4vw;
 }
 
+.coverImg.playlist {
+  border-radius: 5px;
+}
+
 .playlists_cover {
   border-radius: 5px;
   float: left;

@@ -4,7 +4,7 @@ import InfoHeaderBox from "./InfoHeaderBox";
 import "./DisplayPlaylistInfo.css";
 
 function PlaylistBox({ selectedPlaylist }) {
-  console.log(selectedPlaylist);
+  //console.log(selectedPlaylist);
   return (
     <div className="Playlist">
       <InfoHeaderBox playlist={selectedPlaylist} />

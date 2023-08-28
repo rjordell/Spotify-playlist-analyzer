@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import WebPlayback from "./components/player/WebPlayback";
+import WebPlayer from "./components/WebPlayer/WebPlayer";
 import Login from "./components/Login";
 import MainBox from "./components/MainBox";
 import LeftBoxes from "./components/LeftBoxes";
@@ -28,7 +28,7 @@ function App() {
       <div className="App">
         <LeftBoxes onPlaylistClick={setSelectedPlaylist} />
         <MainBox selectedPlaylist={selectedPlaylist} />
-        <WebPlayback token={token} />
+        <WebPlayer token={token} />
       </div>
     );
   }

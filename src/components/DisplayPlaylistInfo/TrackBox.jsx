@@ -2,7 +2,14 @@ import React from "react";
 import { useState, useEffect } from "react";
 import Track from "./Track";
 
-function TrackBox({ playlistId, total, setCombinedData, combinedData }) {
+function TrackBox({
+  playlistId,
+  total,
+  setCombinedData,
+  combinedData,
+  original,
+  setOriginalItems,
+}) {
   const [playlist, setPlaylist] = useState(null);
   const [artists, setArtists] = useState(null);
   const [audioFeatures, setAudioFeatures] = useState(null);
@@ -87,6 +94,7 @@ function TrackBox({ playlistId, total, setCombinedData, combinedData }) {
         items: combinedTracks,
       };
       setCombinedData(updatedPlaylist);
+      setOriginalItems(updatedPlaylist);
     }
   };
 
@@ -134,6 +142,7 @@ function TrackBox({ playlistId, total, setCombinedData, combinedData }) {
   return (
     <div className="main-container tracks">
       {console.log(combinedData)}
+      {console.log(original)}
       {combinedData?.items.map((item) => (
         <Track key={item.track} track={item} />
       ))}

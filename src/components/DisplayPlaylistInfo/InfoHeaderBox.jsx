@@ -1,7 +1,7 @@
 import React from "react";
 import SortBy from "./SortBy";
 
-function InfoHeaderBox({ playlist, setCombinedData, combinedData }) {
+function InfoHeaderBox({ playlist, setCombinedData, combinedData, original }) {
   return (
     <div className="main-container playlistInfo">
       <div className="container track">
@@ -18,7 +18,11 @@ function InfoHeaderBox({ playlist, setCombinedData, combinedData }) {
             </div>
           </div>
         </div>
-        <SortBy setCombinedData={setCombinedData} combinedData={combinedData} />
+        <SortBy
+          setCombinedData={setCombinedData}
+          combinedData={combinedData}
+          original={original}
+        />
       </div>
     </div>
   );

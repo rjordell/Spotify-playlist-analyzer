@@ -1,4 +1,5 @@
 import React from "react";
+import SortBy from "./SortBy";
 
 function InfoHeaderBox({ playlist }) {
   return (
@@ -17,6 +18,7 @@ function InfoHeaderBox({ playlist }) {
             </div>
           </div>
         </div>
+        <SortBy />
       </div>
     </div>
   );

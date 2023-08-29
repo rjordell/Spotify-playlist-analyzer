@@ -25,6 +25,10 @@
   align-items: center;
 }
 
+.main-container.playlistInfo:hover {
+  overflow-y: hidden;
+}
+
 .container.playlistInfo {
   width: 79.4vw;
 }

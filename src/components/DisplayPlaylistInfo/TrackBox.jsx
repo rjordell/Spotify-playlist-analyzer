@@ -9,6 +9,9 @@ function TrackBox({
   combinedData,
   original,
   setOriginalItems,
+  playlistItemsController,
+  artistsInfoController,
+  tracksAudioFeaturesController,
 }) {
   const [playlist, setPlaylist] = useState(null);
   const [artists, setArtists] = useState(null);
@@ -18,7 +21,9 @@ function TrackBox({
 
   const getPlaylistItems = async (url, allItems = []) => {
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        signal: playlistItemsController.signal,
+      });
       const data = await response.json();
       if (data.error) {
         setPlaylist(null);
@@ -36,14 +41,21 @@ function TrackBox({
         }
       }
     } catch (error) {
-      console.error("Error retrieving playlist items:", error);
-      setPlaylist(null);
+      if (error.name === "AbortError") {
+        // todo request cancellation here
+        console.error("Error retrieving playlist items:", error);
+      } else {
+        console.error("Error retrieving playlist items:", error);
+        setPlaylist(null);
+      }
     }
   };
 
   const getArtistsInfo = async (id) => {
     try {
-      const response = await fetch("/auth/getMultipleArtists/" + id);
+      const response = await fetch("/auth/getMultipleArtists/" + id, {
+        signal: artistsInfoController.signal,
+      });
       const data = await response.json();
       if (data.error) {
         setArtists(null);
@@ -54,15 +66,23 @@ function TrackBox({
         }));
       }
     } catch (error) {
-      console.error("Error retrieving artists info:", error);
-      setArtists(null);
+      if (error.name === "AbortError") {
+        // todo request cancellation here
+        console.error("Error retrieving artists info:", error);
+      } else {
+        console.error("Error retrieving artists info:", error);
+        setArtists(null);
+      }
     }
   };
 
   const getTracksAudioFeatures = async (id) => {
     try {
       const response = await fetch(
-        "/auth/getMultipleTracksAudioFeatures/" + id
+        "/auth/getMultipleTracksAudioFeatures/" + id,
+        {
+          signal: tracksAudioFeaturesController.signal,
+        }
       );
       const data = await response.json();
       if (data.error) {
@@ -74,8 +94,13 @@ function TrackBox({
         }));
       }
     } catch (error) {
-      console.error("Error retrieving tracks audio features:", error);
-      setAudioFeatures(null);
+      if (error.name === "AbortError") {
+        // todo request cancellation here
+        console.error("Error retrieving tracks audio features:", error);
+      } else {
+        console.error("Error retrieving tracks audio features:", error);
+        setAudioFeatures(null);
+      }
     }
   };
 

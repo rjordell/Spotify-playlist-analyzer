@@ -11,6 +11,16 @@ function App() {
   //console.log("selectedPlaylist from app");
   //console.log(selectedPlaylist);
 
+  const playlistItemsController = new AbortController();
+  const artistsInfoController = new AbortController();
+  const tracksAudioFeaturesController = new AbortController();
+
+  const cancelFetches = () => {
+    playlistItemsController.abort();
+    artistsInfoController.abort();
+    tracksAudioFeaturesController.abort();
+  };
+
   useEffect(() => {
     async function getToken() {
       const response = await fetch("/auth/token");
@@ -26,8 +36,16 @@ function App() {
   } else {
     return (
       <div className="App">
-        <LeftBoxes onPlaylistClick={setSelectedPlaylist} />
-        <MainBox selectedPlaylist={selectedPlaylist} />
+        <LeftBoxes
+          onPlaylistClick={setSelectedPlaylist}
+          cancelFetches={cancelFetches}
+        />
+        <MainBox
+          selectedPlaylist={selectedPlaylist}
+          playlistItemsController={playlistItemsController}
+          artistsInfoController={artistsInfoController}
+          tracksAudioFeaturesController={tracksAudioFeaturesController}
+        />
         <WebPlayer token={token} />
       </div>
     );

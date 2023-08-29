@@ -4,7 +4,12 @@ import TrackBox from "./TrackBox";
 import InfoHeaderBox from "./InfoHeaderBox";
 import "./DisplayPlaylistInfo.css";
 
-function PlaylistBox({ selectedPlaylist }) {
+function DisplayPlaylistInfo({
+  selectedPlaylist,
+  playlistItemsController,
+  artistsInfoController,
+  tracksAudioFeaturesController,
+}) {
   //console.log(selectedPlaylist);
   const [combinedData, setCombinedData] = useState(null);
   const [original, setOriginalItems] = useState(null);
@@ -24,9 +29,12 @@ function PlaylistBox({ selectedPlaylist }) {
         combinedData={combinedData}
         original={original}
         setOriginalItems={setOriginalItems}
+        playlistItemsController={playlistItemsController}
+        artistsInfoController={artistsInfoController}
+        tracksAudioFeaturesController={tracksAudioFeaturesController}
       />
     </div>
   );
 }
 
-export default PlaylistBox;
+export default DisplayPlaylistInfo;

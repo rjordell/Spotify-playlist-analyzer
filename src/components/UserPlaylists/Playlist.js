@@ -3,6 +3,7 @@ import React from "react";
 function Playlist(props) {
   const handleClick = () => {
     //console.log(props.playlist);
+    props.cancelFetches();
     props.onClick(props.playlist);
   };
   return (

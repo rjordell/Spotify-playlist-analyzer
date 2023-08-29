@@ -4,11 +4,13 @@ import Track from "./Track";
 
 function TrackBox({
   playlistId,
-  total,
   setCombinedData,
   combinedData,
-  original,
   setOriginalItems,
+  setNumOfTracksToFetch,
+  playlistItemsController,
+  artistsInfoController,
+  tracksAudioFeaturesController,
 }) {
   const [playlist, setPlaylist] = useState(null);
   const [artists, setArtists] = useState(null);
@@ -18,7 +20,9 @@ function TrackBox({
 
   const getPlaylistItems = async (url, allItems = []) => {
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        signal: playlistItemsController.signal,
+      });
       const data = await response.json();
       if (data.error) {
         setPlaylist(null);
@@ -26,7 +30,6 @@ function TrackBox({
         const updatedItems = [...allItems, ...data.items];
         setPlaylist({ items: updatedItems });
         if (data.next) {
-          // If there's a "next" page, recursively fetch it
           getPlaylistItems(
             `/auth/getPlaylistItems/${playlistId}?limit=100&offset=${
               data.offset + 100
@@ -36,14 +39,20 @@ function TrackBox({
         }
       }
     } catch (error) {
-      console.error("Error retrieving playlist items:", error);
-      setPlaylist(null);
+      if (error.name === "AbortError") {
+        console.error("Error retrieving playlist items:", error);
+      } else {
+        console.error("Error retrieving playlist items:", error);
+        setPlaylist(null);
+      }
     }
   };
 
   const getArtistsInfo = async (id) => {
     try {
-      const response = await fetch("/auth/getMultipleArtists/" + id);
+      const response = await fetch("/auth/getMultipleArtists/" + id, {
+        signal: artistsInfoController.signal,
+      });
       const data = await response.json();
       if (data.error) {
         setArtists(null);
@@ -54,15 +63,22 @@ function TrackBox({
         }));
       }
     } catch (error) {
-      console.error("Error retrieving artists info:", error);
-      setArtists(null);
+      if (error.name === "AbortError") {
+        console.error("Error retrieving artists info:", error);
+      } else {
+        console.error("Error retrieving artists info:", error);
+        setArtists(null);
+      }
     }
   };
 
   const getTracksAudioFeatures = async (id) => {
     try {
       const response = await fetch(
-        "/auth/getMultipleTracksAudioFeatures/" + id
+        "/auth/getMultipleTracksAudioFeatures/" + id,
+        {
+          signal: tracksAudioFeaturesController.signal,
+        }
       );
       const data = await response.json();
       if (data.error) {
@@ -74,8 +90,12 @@ function TrackBox({
         }));
       }
     } catch (error) {
-      console.error("Error retrieving tracks audio features:", error);
-      setAudioFeatures(null);
+      if (error.name === "AbortError") {
+        console.error("Error retrieving tracks audio features:", error);
+      } else {
+        console.error("Error retrieving tracks audio features:", error);
+        setAudioFeatures(null);
+      }
     }
   };
 
@@ -114,11 +134,15 @@ function TrackBox({
 
   useEffect(() => {
     if (playlist) {
-      //console.log(playlist);
+      console.log(playlist);
       const newTracks = playlist.items.slice(numTracksFetched);
-      const filteredNewTracks = newTracks.filter(
-        (item) => item.track !== null && item.track.artists.length > 0
-      );
+      const filteredNewTracks = newTracks.filter((item) => {
+        if (item.track === null) {
+          setNumOfTracksToFetch((prevNumTracks) => prevNumTracks - 1);
+          return false;
+        }
+        return true;
+      });
 
       const updatedFilteredTracks = [...filteredTracks, ...filteredNewTracks];
       setFilteredTracks(updatedFilteredTracks);
@@ -141,8 +165,6 @@ function TrackBox({
 
   return (
     <div className="main-container tracks">
-      {console.log(combinedData)}
-      {console.log(original)}
       {combinedData?.items.map((item) => (
         <Track key={item.track} track={item} />
       ))}

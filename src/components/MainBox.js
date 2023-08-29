@@ -1,12 +1,24 @@
 import React from "react";
-import PlaylistBox from "./DisplayPlaylistInfo/DisplayPlaylistInfo";
+import DisplayPlaylistInfo from "./DisplayPlaylistInfo/DisplayPlaylistInfo";
 
-function MainBox({ selectedPlaylist }) {
+function MainBox({
+  selectedPlaylist,
+  playlistItemsController,
+  artistsInfoController,
+  tracksAudioFeaturesController,
+}) {
   //console.log("selectedPlaylist from mainbox");
   //console.log(selectedPlaylist);
   return (
     <div className="MainBox">
-      {selectedPlaylist && <PlaylistBox selectedPlaylist={selectedPlaylist} />}
+      {selectedPlaylist && (
+        <DisplayPlaylistInfo
+          selectedPlaylist={selectedPlaylist}
+          playlistItemsController={playlistItemsController}
+          artistsInfoController={artistsInfoController}
+          tracksAudioFeaturesController={tracksAudioFeaturesController}
+        />
+      )}
     </div>
   );
 }

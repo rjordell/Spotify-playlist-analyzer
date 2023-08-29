@@ -1,7 +1,14 @@
 import React from "react";
 import SortBy from "./SortBy";
 
-function InfoHeaderBox({ playlist, setCombinedData, combinedData, original }) {
+function InfoHeaderBox({
+  playlist,
+  setCombinedData,
+  combinedData,
+  original,
+  numOfTracks,
+  displaySort,
+}) {
   return (
     <div className="main-container playlistInfo">
       <div className="container track">
@@ -13,16 +20,18 @@ function InfoHeaderBox({ playlist, setCombinedData, combinedData, original }) {
           />
           <div className="now-playing__side">
             <div className="containerHeader">{playlist.name}</div>
-            <div className="containerSubheader">
-              {playlist.tracks.total} Songs
-            </div>
+            <div className="containerSubheader">{numOfTracks} Songs</div>
           </div>
         </div>
-        <SortBy
-          setCombinedData={setCombinedData}
-          combinedData={combinedData}
-          original={original}
-        />
+        {displaySort == true ? (
+          <SortBy
+            setCombinedData={setCombinedData}
+            combinedData={combinedData}
+            original={original}
+          />
+        ) : (
+          <></>
+        )}
       </div>
     </div>
   );

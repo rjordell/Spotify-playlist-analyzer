@@ -4,11 +4,15 @@ import Track from "./Track";
 
 function TrackBox({
   playlistId,
-  total,
   setCombinedData,
   combinedData,
   original,
   setOriginalItems,
+  setNumTracksFetched,
+  numTracksFetched,
+  setTracksLoaded,
+  tracksLoaded,
+  setNumOfTracksToFetch,
   playlistItemsController,
   artistsInfoController,
   tracksAudioFeaturesController,
@@ -17,7 +21,6 @@ function TrackBox({
   const [artists, setArtists] = useState(null);
   const [audioFeatures, setAudioFeatures] = useState(null);
   const [filteredTracks, setFilteredTracks] = useState([]);
-  const [numTracksFetched, setNumTracksFetched] = useState(0);
 
   const getPlaylistItems = async (url, allItems = []) => {
     try {
@@ -64,6 +67,7 @@ function TrackBox({
           ...prevArtists,
           artists: [...(prevArtists?.artists || []), ...data.artists],
         }));
+        setTracksLoaded(tracksLoaded + 1);
       }
     } catch (error) {
       if (error.name === "AbortError") {
@@ -92,6 +96,7 @@ function TrackBox({
           ...prevAudioFeatures,
           tracks: [...(prevAudioFeatures?.tracks || []), ...data.tracks],
         }));
+        setTracksLoaded(tracksLoaded + 1);
       }
     } catch (error) {
       if (error.name === "AbortError") {
@@ -139,11 +144,15 @@ function TrackBox({
 
   useEffect(() => {
     if (playlist) {
-      //console.log(playlist);
+      console.log(playlist);
       const newTracks = playlist.items.slice(numTracksFetched);
-      const filteredNewTracks = newTracks.filter(
-        (item) => item.track !== null && item.track.artists.length > 0
-      );
+      const filteredNewTracks = newTracks.filter((item) => {
+        if (item.track === null) {
+          setNumOfTracksToFetch((prevNumTracks) => prevNumTracks - 1);
+          return false;
+        }
+        return true;
+      });
 
       const updatedFilteredTracks = [...filteredTracks, ...filteredNewTracks];
       setFilteredTracks(updatedFilteredTracks);
@@ -166,8 +175,6 @@ function TrackBox({
 
   return (
     <div className="main-container tracks">
-      {console.log(combinedData)}
-      {console.log(original)}
       {combinedData?.items.map((item) => (
         <Track key={item.track} track={item} />
       ))}

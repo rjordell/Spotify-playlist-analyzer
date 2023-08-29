@@ -6,12 +6,7 @@ function TrackBox({
   playlistId,
   setCombinedData,
   combinedData,
-  original,
   setOriginalItems,
-  setNumTracksFetched,
-  numTracksFetched,
-  setTracksLoaded,
-  tracksLoaded,
   setNumOfTracksToFetch,
   playlistItemsController,
   artistsInfoController,
@@ -21,6 +16,7 @@ function TrackBox({
   const [artists, setArtists] = useState(null);
   const [audioFeatures, setAudioFeatures] = useState(null);
   const [filteredTracks, setFilteredTracks] = useState([]);
+  const [numTracksFetched, setNumTracksFetched] = useState(0);
 
   const getPlaylistItems = async (url, allItems = []) => {
     try {
@@ -34,7 +30,6 @@ function TrackBox({
         const updatedItems = [...allItems, ...data.items];
         setPlaylist({ items: updatedItems });
         if (data.next) {
-          // If there's a "next" page, recursively fetch it
           getPlaylistItems(
             `/auth/getPlaylistItems/${playlistId}?limit=100&offset=${
               data.offset + 100
@@ -45,7 +40,6 @@ function TrackBox({
       }
     } catch (error) {
       if (error.name === "AbortError") {
-        // todo request cancellation here
         console.error("Error retrieving playlist items:", error);
       } else {
         console.error("Error retrieving playlist items:", error);
@@ -67,11 +61,9 @@ function TrackBox({
           ...prevArtists,
           artists: [...(prevArtists?.artists || []), ...data.artists],
         }));
-        setTracksLoaded(tracksLoaded + 1);
       }
     } catch (error) {
       if (error.name === "AbortError") {
-        // todo request cancellation here
         console.error("Error retrieving artists info:", error);
       } else {
         console.error("Error retrieving artists info:", error);
@@ -96,11 +88,9 @@ function TrackBox({
           ...prevAudioFeatures,
           tracks: [...(prevAudioFeatures?.tracks || []), ...data.tracks],
         }));
-        setTracksLoaded(tracksLoaded + 1);
       }
     } catch (error) {
       if (error.name === "AbortError") {
-        // todo request cancellation here
         console.error("Error retrieving tracks audio features:", error);
       } else {
         console.error("Error retrieving tracks audio features:", error);

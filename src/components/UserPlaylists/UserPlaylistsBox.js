@@ -25,6 +25,7 @@ function UserPlaylistsBox({ onPlaylistClick, cancelFetches }) {
   };
 
   const getUsersPlaylists = async (id) => {
+    setPlaylists(null);
     try {
       const response = await fetch("/auth/getUsersPlaylists/" + id);
       const data = await response.json();

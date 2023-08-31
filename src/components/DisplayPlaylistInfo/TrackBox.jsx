@@ -20,22 +20,13 @@ function TrackBox({
       );
       const data = await response.json();
       if (data.error) {
-        console.log("got error");
-        console.log(data.error);
         setCombinedData(null);
         setOriginalItems(null);
       } else {
-        console.log("no error: playlist");
-        console.log(data);
-
         const updatedItems = [...allItems, ...data.items];
         data.items = updatedItems;
         setCombinedData(data);
         setOriginalItems(data);
-        //setPlaylistTracks({ items: updatedItems });
-
-        //console.log("playlist with updated tracks");
-        //console.log(playlistTracks);
         if (data.next) {
           getCombinedData(data.offset + 100, updatedItems);
         } else {
@@ -62,17 +53,10 @@ function TrackBox({
     }
   }, [playlistId]);
 
-  useEffect(() => {
-    if (combinedData) {
-      console.log("combinedData");
-      console.log(combinedData);
-    }
-  }, [combinedData]);
-
   return (
     <div className="main-container tracks">
       {combinedData?.items.map((item) => (
-        <Track key={item.track} track={item} />
+        <Track key={item.track.id} track={item} />
       ))}
     </div>
   );

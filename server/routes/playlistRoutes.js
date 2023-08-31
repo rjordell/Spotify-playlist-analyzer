@@ -96,14 +96,11 @@ const getMultipleArtistsInfo = async (ids) => {
 };
 
 router.get("/getCombinedData/:id", async (req, res) => {
-  //console.log("getCombinedData");
   try {
     const playlistId = req.params.id;
     const { offset, limit } = req.query;
 
     const playlistTracks = await getPlaylistItems(playlistId, offset, limit);
-    //console.log("playlistTracks before combination");
-    //console.log(playlistTracks);
 
     const filteredTracks = playlistTracks.items.filter((item) => {
       if (item.track === null) {
@@ -112,9 +109,7 @@ router.get("/getCombinedData/:id", async (req, res) => {
       }
       return true;
     });
-    //console.log(filteredTracks);
 
-    //console.log("playlistInfo set to filteredtracks");
     playlistTracks.items = filteredTracks;
 
     const artistIds = playlistTracks.items
@@ -138,8 +133,6 @@ router.get("/getCombinedData/:id", async (req, res) => {
       playlistTracks.items[index].track = trackWithArtist;
     });
 
-    //console.log("playlistTracks after combination");
-    //console.log(playlistTracks);
     res.json(playlistTracks);
   } catch (error) {
     res.status(500).json({ error: "Error fetching combined data" });
@@ -170,7 +163,6 @@ router.get("/getMultipleTracksAudioFeatures/:ids", async (req, res) => {
 });
 
 router.get("/getMultipleArtistsInfo/:ids", async (req, res) => {
-  //console.log("getMultipleArtistsInfo");
   try {
     const artistIds = req.params.ids;
 

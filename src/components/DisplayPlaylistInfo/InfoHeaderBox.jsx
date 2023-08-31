@@ -30,7 +30,7 @@ function InfoHeaderBox({
             original={original}
           />
         ) : (
-          <div>Still loading tracks...</div>
+          <div>Loading tracks...</div>
         )}
       </div>
     </div>

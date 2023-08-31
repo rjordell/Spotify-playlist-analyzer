@@ -31,7 +31,7 @@ function TrackBox({
         setPlaylist({ items: updatedItems });
         if (data.next) {
           getPlaylistItems(
-            `/auth/getPlaylistItems/${playlistId}?limit=100&offset=${
+            `/auth/playlist/getPlaylistItems/${playlistId}?limit=100&offset=${
               data.offset + 100
             }`,
             updatedItems
@@ -50,9 +50,12 @@ function TrackBox({
 
   const getArtistsInfo = async (id) => {
     try {
-      const response = await fetch("/auth/getMultipleArtists/" + id, {
-        signal: artistsInfoController.signal,
-      });
+      const response = await fetch(
+        "/auth/playlist/getMultipleArtistsInfo/" + id,
+        {
+          signal: artistsInfoController.signal,
+        }
+      );
       const data = await response.json();
       if (data.error) {
         setArtists(null);
@@ -75,7 +78,7 @@ function TrackBox({
   const getTracksAudioFeatures = async (id) => {
     try {
       const response = await fetch(
-        "/auth/getMultipleTracksAudioFeatures/" + id,
+        "/auth/playlist/getMultipleTracksAudioFeatures/" + id,
         {
           signal: tracksAudioFeaturesController.signal,
         }
@@ -127,7 +130,7 @@ function TrackBox({
       setCombinedData(null);
       setNumTracksFetched(0);
       getPlaylistItems(
-        `/auth/getPlaylistItems/${playlistId}?limit=100&offset=0`
+        `/auth/playlist/getPlaylistItems/${playlistId}?limit=100&offset=0`
       );
     }
   }, [playlistId]);

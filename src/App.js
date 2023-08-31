@@ -12,13 +12,9 @@ function App() {
   //console.log(selectedPlaylist);
 
   const playlistItemsController = new AbortController();
-  const artistsInfoController = new AbortController();
-  const tracksAudioFeaturesController = new AbortController();
 
   const cancelFetches = () => {
     playlistItemsController.abort();
-    artistsInfoController.abort();
-    tracksAudioFeaturesController.abort();
   };
 
   useEffect(() => {
@@ -43,8 +39,6 @@ function App() {
         <MainBox
           selectedPlaylist={selectedPlaylist}
           playlistItemsController={playlistItemsController}
-          artistsInfoController={artistsInfoController}
-          tracksAudioFeaturesController={tracksAudioFeaturesController}
         />
         <WebPlayer token={token} />
       </div>

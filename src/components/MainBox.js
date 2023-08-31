@@ -1,12 +1,7 @@
 import React from "react";
 import DisplayPlaylistInfo from "./DisplayPlaylistInfo/DisplayPlaylistInfo";
 
-function MainBox({
-  selectedPlaylist,
-  playlistItemsController,
-  artistsInfoController,
-  tracksAudioFeaturesController,
-}) {
+function MainBox({ selectedPlaylist, playlistItemsController }) {
   //console.log("selectedPlaylist from mainbox");
   //console.log(selectedPlaylist);
   return (
@@ -15,8 +10,6 @@ function MainBox({
         <DisplayPlaylistInfo
           selectedPlaylist={selectedPlaylist}
           playlistItemsController={playlistItemsController}
-          artistsInfoController={artistsInfoController}
-          tracksAudioFeaturesController={tracksAudioFeaturesController}
         />
       )}
     </div>

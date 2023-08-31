@@ -18,6 +18,8 @@ function TrackBox({
   const [filteredTracks, setFilteredTracks] = useState([]);
   const [numTracksFetched, setNumTracksFetched] = useState(0);
 
+  const [playlistTracks, setPlaylistTracks] = useState(null);
+
   const getPlaylistItems = async (url, allItems = []) => {
     try {
       const response = await fetch(url, {
@@ -48,76 +50,42 @@ function TrackBox({
     }
   };
 
-  const getArtistsInfo = async (id) => {
+  const getCombinedData = async (offset) => {
     try {
       const response = await fetch(
-        "/auth/playlist/getMultipleArtistsInfo/" + id,
+        `/auth/playlist/getCombinedData/${playlistId}?limit=100&offset=${offset}`,
         {
           signal: artistsInfoController.signal,
         }
       );
       const data = await response.json();
       if (data.error) {
-        setArtists(null);
+        console.log("got error");
+        console.log(data.error);
+        setPlaylistTracks(null);
       } else {
-        setArtists((prevArtists) => ({
-          ...prevArtists,
-          artists: [...(prevArtists?.artists || []), ...data.artists],
-        }));
-      }
-    } catch (error) {
-      if (error.name === "AbortError") {
-        console.error("Error retrieving artists info:", error);
-      } else {
-        console.error("Error retrieving artists info:", error);
-        setArtists(null);
-      }
-    }
-  };
+        console.log("no error: playlist");
+        console.log(data);
 
-  const getTracksAudioFeatures = async (id) => {
-    try {
-      const response = await fetch(
-        "/auth/playlist/getMultipleTracksAudioFeatures/" + id,
-        {
-          signal: tracksAudioFeaturesController.signal,
-        }
-      );
-      const data = await response.json();
-      if (data.error) {
-        setAudioFeatures(null);
-      } else {
-        setAudioFeatures((prevAudioFeatures) => ({
-          ...prevAudioFeatures,
-          tracks: [...(prevAudioFeatures?.tracks || []), ...data.tracks],
-        }));
-      }
-    } catch (error) {
-      if (error.name === "AbortError") {
-        console.error("Error retrieving tracks audio features:", error);
-      } else {
-        console.error("Error retrieving tracks audio features:", error);
-        setAudioFeatures(null);
-      }
-    }
-  };
-
-  const combineData = async () => {
-    if (artists && audioFeatures) {
-      const combinedTracks = filteredTracks.map((item, index) => {
-        const trackWithArtist = {
-          ...item.track,
-          artists: [artists.artists[index]],
-          ...audioFeatures.tracks[index],
+        const updatedTracks = {
+          ...playlistTracks.items,
+          ...data.tracks,
         };
-        return trackWithArtist;
-      });
-      const updatedPlaylist = {
-        ...playlist,
-        items: combinedTracks,
-      };
-      setCombinedData(updatedPlaylist);
-      setOriginalItems(updatedPlaylist);
+
+        setPlaylistTracks({ items: updatedTracks });
+        console.log("playlist with updated tracks");
+        console.log(playlistTracks);
+        if (data.next) {
+          getCombinedData(data.offset + 100);
+        }
+      }
+    } catch (error) {
+      if (error.name === "AbortError") {
+        console.error("Error retrieving combined data:", error);
+      } else {
+        console.error("Error retrieving combined data:", error);
+        setPlaylistTracks(null);
+      }
     }
   };
 
@@ -129,46 +97,19 @@ function TrackBox({
       setFilteredTracks([]);
       setCombinedData(null);
       setNumTracksFetched(0);
+      /*
       getPlaylistItems(
         `/auth/playlist/getPlaylistItems/${playlistId}?limit=100&offset=0`
       );
+      */
+      setPlaylistTracks(null);
+      getCombinedData(0);
     }
   }, [playlistId]);
 
-  useEffect(() => {
-    if (playlist) {
-      console.log(playlist);
-      const newTracks = playlist.items.slice(numTracksFetched);
-      const filteredNewTracks = newTracks.filter((item) => {
-        if (item.track === null) {
-          setNumOfTracksToFetch((prevNumTracks) => prevNumTracks - 1);
-          return false;
-        }
-        return true;
-      });
-
-      const updatedFilteredTracks = [...filteredTracks, ...filteredNewTracks];
-      setFilteredTracks(updatedFilteredTracks);
-
-      const artistIds = filteredNewTracks
-        .map((item) => item.track.artists[0].id)
-        .join(",");
-      getArtistsInfo(artistIds);
-
-      const trackIds = filteredNewTracks.map((item) => item.track.id).join(",");
-      getTracksAudioFeatures(trackIds);
-
-      setNumTracksFetched(playlist.items.length);
-    }
-  }, [playlist]);
-
-  useEffect(() => {
-    combineData();
-  }, [artists, audioFeatures]);
-
   return (
     <div className="main-container tracks">
-      {combinedData?.items.map((item) => (
+      {playlistTracks?.items.map((item) => (
         <Track key={item.track} track={item} />
       ))}
     </div>

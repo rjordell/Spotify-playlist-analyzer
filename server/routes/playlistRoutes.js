@@ -96,13 +96,51 @@ const getMultipleArtistsInfo = async (ids) => {
 };
 
 router.get("/getCombinedData/:id", async (req, res) => {
+  //console.log("getCombinedData");
   try {
     const playlistId = req.params.id;
     const { offset, limit } = req.query;
 
-    const playlistInfo = await getPlaylistItems(playlistId, offset, limit);
+    const playlistTracks = await getPlaylistItems(playlistId, offset, limit);
+    //console.log("playlistTracks before combination");
+    //console.log(playlistTracks);
 
-    res.json(playlistInfo);
+    const filteredTracks = playlistTracks.items.filter((item) => {
+      if (item.track === null) {
+        playlistTracks.total -= 1;
+        return false;
+      }
+      return true;
+    });
+    //console.log(filteredTracks);
+
+    //console.log("playlistInfo set to filteredtracks");
+    playlistTracks.items = filteredTracks;
+
+    const artistIds = playlistTracks.items
+      .map((item) => item.track.artists[0].id)
+      .join(",");
+
+    const trackIds = playlistTracks.items
+      .map((item) => item.track.id)
+      .join(",");
+
+    const artistsInfo = await getMultipleArtistsInfo(artistIds);
+
+    const tracksInfo = await getMultipleTracksAudioFeatures(trackIds);
+
+    playlistTracks.items.map((item, index) => {
+      const trackWithArtist = {
+        ...item.track,
+        artists: [artistsInfo.artists[index]],
+        ...tracksInfo.tracks[index],
+      };
+      playlistTracks.items[index].track = trackWithArtist;
+    });
+
+    //console.log("playlistTracks after combination");
+    //console.log(playlistTracks);
+    res.json(playlistTracks);
   } catch (error) {
     res.status(500).json({ error: "Error fetching combined data" });
   }
@@ -163,4 +201,5 @@ router.get("/getPlaylistinfo/:id", (req, res) => {
     }
   );
 });
+
 module.exports = router;

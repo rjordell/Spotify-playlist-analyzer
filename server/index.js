@@ -58,7 +58,6 @@ app.get("/auth/login", (req, res) => {
 });
 
 app.get("/auth/getUsersPlaylists/:id", (req, res) => {
-  console.log("getUsersPlaylists");
   const userId = req.params.id;
   let allPlaylists = [];
   let data = null;

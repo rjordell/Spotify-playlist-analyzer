@@ -54,109 +54,8 @@ const getMultipleTracksAudioFeatures = async (ids) => {
   });
 };
 
-router.get("/getCombinedData/:id", async (req, res) => {
-  try {
-    const playlistId = req.params.id;
-    const { offset, limit } = req.query;
-
-    const playlistInfo = await getPlaylistItems(playlistId, offset, limit);
-
-    res.json(playlistInfo);
-  } catch (error) {
-    res.status(500).json({ error: "Error fetching combined data" });
-  }
-});
-
-router.get("/getPlaylistItems/:id", async (req, res) => {
-  try {
-    const playlistId = req.params.id;
-    const { offset, limit } = req.query;
-
-    const playlistInfo = await getPlaylistItems(playlistId, offset, limit);
-    res.json(playlistInfo);
-  } catch (error) {
-    res.status(500).json({ error: "Error fetching playlist items" });
-  }
-});
-
-router.get("/getPlaylistinfo/:id", (req, res) => {
-  const playlistId = req.params.id;
-
-  request.get(
-    `https://api.spotify.com/v1/playlists/${playlistId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-      },
-    },
-    (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        const playlistInfo = JSON.parse(body);
-        res.json(playlistInfo);
-      } else {
-        res.status(response.statusCode).json({ error: "Invalid playlist id" });
-      }
-    }
-  );
-});
-
-router.get("/getMultipleTracksAudioFeatures/:ids", async (req, res) => {
-  try {
-    const trackIds = req.params.ids;
-
-    const trackAudioFeatures = await getMultipleTracksAudioFeatures(trackIds);
-    res.json(trackAudioFeatures);
-  } catch (error) {
-    res.status(500).json({ error: "Error fetching tracks' audio features" });
-  }
-});
-
-/*
-router.get("/getMultipleTracksAudioFeatures/:ids", async (req, res) => {
-  const trackIds = req.params.ids.split(",");
-  const chunkedIds = splitArrayIntoChunks(trackIds, 100);
-
-  const trackInfoPromises = [];
-
-  for (const chunk of chunkedIds) {
-    const trackIdsString = chunk.join(",");
-    const promise = new Promise((resolve, reject) => {
-      request.get(
-        `https://api.spotify.com/v1/audio-features?ids=${trackIdsString}`,
-        {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-          },
-        },
-        (error, response, body) => {
-          if (!error && response.statusCode === 200) {
-            const trackInfo = JSON.parse(body);
-            resolve(trackInfo);
-          } else {
-            reject(error);
-          }
-        }
-      );
-    });
-    trackInfoPromises.push(promise);
-  }
-
-  try {
-    const trackInfoResults = await Promise.all(trackInfoPromises);
-    const combinedTrackInfo = trackInfoResults.reduce(
-      (accumulator, current) => accumulator.concat(current.audio_features),
-      []
-    );
-    res.json({ tracks: combinedTrackInfo });
-  } catch (error) {
-    res.status(500).json({ error: "Error fetching track information" });
-  }
-});
-
-*/
-
-router.get("/getMultipleArtistsInfo/:ids", async (req, res) => {
-  const artistIds = req.params.ids.split(",");
+const getMultipleArtistsInfo = async (ids) => {
+  const artistIds = ids.split(",");
   const chunkedIds = splitArrayIntoChunks(artistIds, 50);
 
   const artistInfoPromises = [];
@@ -190,10 +89,78 @@ router.get("/getMultipleArtistsInfo/:ids", async (req, res) => {
       (accumulator, current) => accumulator.concat(current.artists),
       []
     );
-    res.json({ artists: combinedArtistInfo });
+    return { artists: combinedArtistInfo };
   } catch (error) {
-    res.status(500).json({ error: "Error fetching artist information" });
+    throw new Error("Error fetching artist information");
+  }
+};
+
+router.get("/getCombinedData/:id", async (req, res) => {
+  try {
+    const playlistId = req.params.id;
+    const { offset, limit } = req.query;
+
+    const playlistInfo = await getPlaylistItems(playlistId, offset, limit);
+
+    res.json(playlistInfo);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching combined data" });
   }
 });
 
+router.get("/getPlaylistItems/:id", async (req, res) => {
+  try {
+    const playlistId = req.params.id;
+    const { offset, limit } = req.query;
+
+    const playlistInfo = await getPlaylistItems(playlistId, offset, limit);
+    res.json(playlistInfo);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching playlist items" });
+  }
+});
+
+router.get("/getMultipleTracksAudioFeatures/:ids", async (req, res) => {
+  try {
+    const trackIds = req.params.ids;
+
+    const trackAudioFeatures = await getMultipleTracksAudioFeatures(trackIds);
+    res.json(trackAudioFeatures);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching tracks' audio features" });
+  }
+});
+
+router.get("/getMultipleArtistsInfo/:ids", async (req, res) => {
+  //console.log("getMultipleArtistsInfo");
+  try {
+    const artistIds = req.params.ids;
+
+    const artistsInfo = await getMultipleArtistsInfo(artistIds);
+    res.json(artistsInfo);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching artists' info" });
+  }
+});
+
+router.get("/getPlaylistinfo/:id", (req, res) => {
+  const playlistId = req.params.id;
+
+  request.get(
+    `https://api.spotify.com/v1/playlists/${playlistId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    },
+    (error, response, body) => {
+      if (!error && response.statusCode === 200) {
+        const playlistInfo = JSON.parse(body);
+        res.json(playlistInfo);
+      } else {
+        res.status(response.statusCode).json({ error: "Invalid playlist id" });
+      }
+    }
+  );
+});
 module.exports = router;

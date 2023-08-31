@@ -7,7 +7,7 @@ function TrackBox({
   setCombinedData,
   combinedData,
   setOriginalItems,
-  setNumOfTracksToFetch,
+  setDisplaySort,
   playlistItemsController,
 }) {
   const getCombinedData = async (offset, allItems = []) => {
@@ -38,6 +38,8 @@ function TrackBox({
         //console.log(playlistTracks);
         if (data.next) {
           getCombinedData(data.offset + 100, updatedItems);
+        } else {
+          setDisplaySort(true);
         }
       }
     } catch (error) {
@@ -55,11 +57,7 @@ function TrackBox({
     if (playlistId) {
       setCombinedData(null);
       setOriginalItems(null);
-      /*
-      getPlaylistItems(
-        `/auth/playlist/getPlaylistItems/${playlistId}?limit=100&offset=0`
-      );
-      */
+      setDisplaySort(false);
       getCombinedData(0);
     }
   }, [playlistId]);

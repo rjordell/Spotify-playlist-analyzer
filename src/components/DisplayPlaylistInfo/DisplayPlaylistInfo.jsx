@@ -4,33 +4,11 @@ import TrackBox from "./TrackBox";
 import InfoHeaderBox from "./InfoHeaderBox";
 import "./DisplayPlaylistInfo.css";
 
-function DisplayPlaylistInfo({
-  selectedPlaylist,
-  playlistItemsController,
-  artistsInfoController,
-  tracksAudioFeaturesController,
-}) {
+function DisplayPlaylistInfo({ selectedPlaylist, playlistItemsController }) {
   //console.log(selectedPlaylist);
   const [combinedData, setCombinedData] = useState(null);
   const [original, setOriginalItems] = useState(null);
-  const [numOfTracksToFetch, setNumOfTracksToFetch] = useState(0);
   const [displaySort, setDisplaySort] = useState(false);
-
-  useEffect(() => {
-    if (selectedPlaylist) {
-      setNumOfTracksToFetch(selectedPlaylist.tracks.total);
-    }
-  }, [selectedPlaylist]);
-
-  useEffect(() => {
-    if (combinedData) {
-      if (combinedData.items.length == numOfTracksToFetch) {
-        setDisplaySort(true);
-      }
-    } else {
-      setDisplaySort(false);
-    }
-  }, [combinedData, numOfTracksToFetch]);
 
   return (
     <div className="Playlist">
@@ -39,7 +17,6 @@ function DisplayPlaylistInfo({
         setCombinedData={setCombinedData}
         combinedData={combinedData}
         original={original}
-        numOfTracks={numOfTracksToFetch}
         displaySort={displaySort}
       />
       <TrackBox
@@ -47,10 +24,8 @@ function DisplayPlaylistInfo({
         setCombinedData={setCombinedData}
         combinedData={combinedData}
         setOriginalItems={setOriginalItems}
-        setNumOfTracksToFetch={setNumOfTracksToFetch}
+        setDisplaySort={setDisplaySort}
         playlistItemsController={playlistItemsController}
-        artistsInfoController={artistsInfoController}
-        tracksAudioFeaturesController={tracksAudioFeaturesController}
       />
     </div>
   );

@@ -56,7 +56,7 @@ function TrackBox({
   return (
     <div className="main-container tracks">
       {combinedData?.items.map((item) => (
-        <Track key={item.track.id} track={item} />
+        <Track key={item.track} track={item} />
       ))}
     </div>
   );

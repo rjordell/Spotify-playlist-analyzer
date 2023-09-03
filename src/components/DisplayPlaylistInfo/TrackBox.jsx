@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import Track from "./Track";
 
 function TrackBox({
@@ -56,7 +56,7 @@ function TrackBox({
   return (
     <div className="main-container tracks">
       {combinedData?.items.map((item) => (
-        <Track key={item.track.id} track={item} />
+        <Track key={item.track} track={item} />
       ))}
     </div>
   );

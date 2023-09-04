@@ -103,7 +103,7 @@ router.get("/getCombinedData/:id", async (req, res) => {
     const playlistTracks = await getPlaylistItems(playlistId, offset, limit);
 
     const filteredTracks = playlistTracks.items.filter((item) => {
-      if (item.track === null) {
+      if (item.track === null || item.track.name == "") {
         playlistTracks.total -= 1;
         return false;
       }
@@ -134,6 +134,7 @@ router.get("/getCombinedData/:id", async (req, res) => {
     });
 
     res.json(playlistTracks);
+    //console.log(playlistTracks);
   } catch (error) {
     res.status(500).json({ error: "Error fetching combined data" });
   }

@@ -8,8 +8,8 @@ import "./styles/App.css";
 function App() {
   const [token, setToken] = useState("");
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
-  //console.log("selectedPlaylist from app");
-  //console.log(selectedPlaylist);
+  console.log("selectedPlaylist from app");
+  console.log(selectedPlaylist);
 
   const playlistItemsController = new AbortController();
 

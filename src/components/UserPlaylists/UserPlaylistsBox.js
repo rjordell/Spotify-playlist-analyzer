@@ -6,10 +6,11 @@ import "./UserPlaylistsBox.css";
 function UserPlaylistsBox({ onPlaylistClick, cancelFetches }) {
   const [inputValue, setInputValue] = useState("");
   const [playlists, setPlaylists] = useState(null);
+  const [likedTracks, setlikedTracks] = useState(null);
 
   const getCurrentUsersPlaylists = async () => {
     try {
-      const response = await fetch("/auth/getCurrentUsersPlaylists/");
+      const response = await fetch("/auth/user/getCurrentUsersPlaylists/");
       const data = await response.json();
       if (data.error) {
         setPlaylists(null);
@@ -24,11 +25,47 @@ function UserPlaylistsBox({ onPlaylistClick, cancelFetches }) {
     }
   };
 
+  const getLikedTracks = async (offset) => {
+    try {
+      const response = await fetch(
+        `/auth/user/getLikedTracks/?limit=50&offset=${offset}`
+      );
+      const data = await response.json();
+      if (data.error) {
+        setlikedTracks(null);
+      } else {
+        setlikedTracks(data);
+      }
+      console.log("liked tracks");
+      console.log(data);
+    } catch (error) {
+      console.error("Error retrieving liked tracks:", error);
+      setlikedTracks(null);
+    }
+  };
+
+  const getLikedTracks2 = async (offset) => {
+    try {
+      const response = await fetch(`/auth/user/getLikedTracks2`);
+      const data = await response.json();
+      if (data.error) {
+        setlikedTracks(null);
+      } else {
+        setlikedTracks(data);
+      }
+      console.log("liked tracks");
+      console.log(data);
+    } catch (error) {
+      console.error("Error retrieving liked tracks:", error);
+      setlikedTracks(null);
+    }
+  };
+
   const getUsersPlaylists = async (id) => {
     setPlaylists(null);
     //console.log("called getUsersPlaylists");
     try {
-      const response = await fetch("/auth/getUsersPlaylists/" + id);
+      const response = await fetch("/auth/user/getUsersPlaylists/" + id);
       const data = await response.json();
       if (data.error) {
         setPlaylists(null);
@@ -45,6 +82,7 @@ function UserPlaylistsBox({ onPlaylistClick, cancelFetches }) {
 
   useEffect(() => {
     getCurrentUsersPlaylists();
+    getLikedTracks2();
   }, []);
 
   return (

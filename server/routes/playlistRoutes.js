@@ -95,6 +95,47 @@ const getMultipleArtistsInfo = async (ids) => {
   }
 };
 
+const getMultipleTracksSavedStatus = async (ids) => {
+  const trackIds = ids.split(",");
+  const chunkedIds = splitArrayIntoChunks(trackIds, 50);
+
+  const trackInfoPromises = [];
+
+  for (const chunk of chunkedIds) {
+    const trackIdsString = chunk.join(",");
+    const promise = new Promise((resolve, reject) => {
+      request.get(
+        `https://api.spotify.com/v1/me/tracks/contains?ids=${trackIdsString}`,
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        },
+        (error, response, body) => {
+          if (!error && response.statusCode === 200) {
+            const trackInfo = JSON.parse(body);
+            resolve(trackInfo);
+          } else {
+            reject(error);
+          }
+        }
+      );
+    });
+    trackInfoPromises.push(promise);
+  }
+
+  try {
+    const trackInfoResults = await Promise.all(trackInfoPromises);
+    const combinedTrackInfo = trackInfoResults.reduce(
+      (accumulator, current) => accumulator.concat(current),
+      []
+    );
+    return { tracks: combinedTrackInfo };
+  } catch (error) {
+    throw new Error("Error fetching track information");
+  }
+};
+
 router.get("/getCombinedData/:id", async (req, res) => {
   try {
     const playlistId = req.params.id;
@@ -123,16 +164,28 @@ router.get("/getCombinedData/:id", async (req, res) => {
     const artistsInfo = await getMultipleArtistsInfo(artistIds);
 
     const tracksInfo = await getMultipleTracksAudioFeatures(trackIds);
+    //console.log("tracksInfo");
+    //console.log(tracksInfo);
+
+    const savedStatus = await getMultipleTracksSavedStatus(trackIds);
+    //console.log(savedStatus);
+    //console.log("savedStatus");
+
+    //console.log("playlistTracks.items");
+    //console.log(playlistTracks.items);
 
     playlistTracks.items.map((item, index) => {
       const trackWithArtist = {
         ...item.track,
         artists: [artistsInfo.artists[index]],
         ...tracksInfo.tracks[index],
+        saved: savedStatus.tracks[index],
       };
       playlistTracks.items[index].track = trackWithArtist;
     });
 
+    //console.log("playlistTracks.items after");
+    //console.log(playlistTracks.items);
     res.json(playlistTracks);
     //console.log(playlistTracks);
   } catch (error) {
@@ -193,6 +246,17 @@ router.get("/getPlaylistinfo/:id", (req, res) => {
       }
     }
   );
+});
+
+router.get("/getMultipleTracksSavedStatus/:ids", async (req, res) => {
+  try {
+    const trackIds = req.params.ids;
+
+    const tracksLikedStatuses = await getMultipleTracksSavedStatus(trackIds);
+    res.json(tracksLikedStatuses);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching tracks' liked statuses" });
+  }
 });
 
 module.exports = router;

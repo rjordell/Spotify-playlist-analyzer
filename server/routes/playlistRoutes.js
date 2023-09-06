@@ -99,11 +99,9 @@ const getMultipleTracksSavedStatus = async (ids) => {
   const trackIds = ids.split(",");
   const chunkedIds = splitArrayIntoChunks(trackIds, 50);
 
-  const trackInfoPromises = [];
-
-  for (const chunk of chunkedIds) {
+  const trackInfoPromises = chunkedIds.map((chunk) => {
     const trackIdsString = chunk.join(",");
-    const promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       request.get(
         `https://api.spotify.com/v1/me/tracks/contains?ids=${trackIdsString}`,
         {
@@ -121,18 +119,14 @@ const getMultipleTracksSavedStatus = async (ids) => {
         }
       );
     });
-    trackInfoPromises.push(promise);
-  }
+  });
 
   try {
     const trackInfoResults = await Promise.all(trackInfoPromises);
-    const combinedTrackInfo = trackInfoResults.reduce(
-      (accumulator, current) => accumulator.concat(current),
-      []
-    );
+    const combinedTrackInfo = [].concat(...trackInfoResults);
     return { tracks: combinedTrackInfo };
   } catch (error) {
-    throw new Error("Error fetching track information");
+    throw new Error("Error fetching tracks' saved status");
   }
 };
 

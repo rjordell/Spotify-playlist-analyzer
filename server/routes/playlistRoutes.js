@@ -58,11 +58,9 @@ const getMultipleArtistsInfo = async (ids) => {
   const artistIds = ids.split(",");
   const chunkedIds = splitArrayIntoChunks(artistIds, 50);
 
-  const artistInfoPromises = [];
-
-  for (const chunk of chunkedIds) {
+  const artistInfoPromises = chunkedIds.map((chunk) => {
     const artistIdsString = chunk.join(",");
-    const promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       request.get(
         `https://api.spotify.com/v1/artists?ids=${artistIdsString}`,
         {
@@ -80,16 +78,15 @@ const getMultipleArtistsInfo = async (ids) => {
         }
       );
     });
-    artistInfoPromises.push(promise);
-  }
+  });
 
   try {
     const artistInfoResults = await Promise.all(artistInfoPromises);
-    const combinedArtistInfo = artistInfoResults.reduce(
+    const artistsArray = artistInfoResults.reduce(
       (accumulator, current) => accumulator.concat(current.artists),
       []
     );
-    return { artists: combinedArtistInfo };
+    return { artists: [].concat(...artistsArray) };
   } catch (error) {
     throw new Error("Error fetching artist information");
   }
@@ -158,15 +155,8 @@ router.get("/getCombinedData/:id", async (req, res) => {
     const artistsInfo = await getMultipleArtistsInfo(artistIds);
 
     const tracksInfo = await getMultipleTracksAudioFeatures(trackIds);
-    //console.log("tracksInfo");
-    //console.log(tracksInfo);
 
     const savedStatus = await getMultipleTracksSavedStatus(trackIds);
-    //console.log(savedStatus);
-    //console.log("savedStatus");
-
-    //console.log("playlistTracks.items");
-    //console.log(playlistTracks.items);
 
     playlistTracks.items.map((item, index) => {
       const trackWithArtist = {
@@ -177,11 +167,7 @@ router.get("/getCombinedData/:id", async (req, res) => {
       };
       playlistTracks.items[index].track = trackWithArtist;
     });
-
-    //console.log("playlistTracks.items after");
-    //console.log(playlistTracks.items);
     res.json(playlistTracks);
-    //console.log(playlistTracks);
   } catch (error) {
     res.status(500).json({ error: "Error fetching combined data" });
   }

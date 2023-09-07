@@ -23,6 +23,29 @@ const getLikedTracks = (offset, limit) => {
   });
 };
 
+router.get("/getCurrentUsersProfile/", (req, res) => {
+  let data = null;
+
+  request.get(
+    `https://api.spotify.com/v1/me`,
+    {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    },
+    (error, response, body) => {
+      if (!error && response.statusCode === 200) {
+        data = JSON.parse(body);
+        res.json(data);
+      } else {
+        res
+          .status(response.statusCode)
+          .json({ error: "Couldn't fetch current user's profile" });
+      }
+    }
+  );
+});
+
 router.get("/getUsersPlaylists/:id", (req, res) => {
   const userId = req.params.id;
   let allPlaylists = [];
@@ -131,7 +154,6 @@ router.get("/getCurrentUsersPlaylists/", (req, res) => {
 router.get("/getLikedTracks/", async (req, res) => {
   try {
     const { offset, limit } = req.query;
-
     const likedTracks = await getLikedTracks(offset, limit);
     res.json(likedTracks);
   } catch (error) {

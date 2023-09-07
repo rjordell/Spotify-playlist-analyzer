@@ -7,6 +7,8 @@ import "./styles/App.css";
 
 function App() {
   const [token, setToken] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
+
   const [selectedPlaylist, setSelectedPlaylist] = useState({
     id: null,
     coverImg: null,
@@ -15,8 +17,8 @@ function App() {
     publicity: null,
   });
 
-  console.log("selectedPlaylist from app");
-  console.log(selectedPlaylist);
+  //console.log("selectedPlaylist from app");
+  //console.log(selectedPlaylist);
 
   const playlistItemsController = new AbortController();
 
@@ -33,6 +35,17 @@ function App() {
 
     getToken();
   }, []);
+
+  useEffect(() => {
+    async function getCurrentUserProfile() {
+      const response = await fetch("/auth/user/getCurrentUsersProfile");
+      const json = await response.json();
+      //console.log(json);
+      setCurrentUser(json);
+    }
+
+    getCurrentUserProfile();
+  }, [token]);
 
   if (token === "") {
     return <Login />;

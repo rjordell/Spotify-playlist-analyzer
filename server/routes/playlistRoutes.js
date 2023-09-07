@@ -2,6 +2,10 @@ const express = require("express");
 const request = require("request");
 const router = express.Router();
 
+const savedTracksSet = new Set();
+
+let isSetCached = false;
+
 var splitArrayIntoChunks = function (arr, chunkSize) {
   const chunks = [];
   for (let i = 0; i < arr.length; i += chunkSize) {
@@ -9,6 +13,59 @@ var splitArrayIntoChunks = function (arr, chunkSize) {
   }
   return chunks;
 };
+
+const getSavedTracks = (offset, limit) => {
+  return new Promise((resolve, reject) => {
+    let allLikedTracks = [];
+    let data = null;
+
+    const fetchLikedTracks = (url) => {
+      request.get(
+        url,
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        },
+        (error, response, body) => {
+          if (!error && response.statusCode === 200) {
+            data = JSON.parse(body);
+            allLikedTracks = allLikedTracks.concat(data.items);
+            if (data.next) {
+              fetchLikedTracks(data.next);
+            } else {
+              data.items = allLikedTracks;
+              resolve(data);
+            }
+          } else {
+            reject(error);
+          }
+        }
+      );
+    };
+
+    fetchLikedTracks(
+      `https://api.spotify.com/v1/me/tracks?offset=${offset}&limit=${limit}`
+    );
+  });
+};
+
+const populateSavedTrackStatus = async () => {
+  try {
+    const savedTracks = await getSavedTracks();
+
+    savedTracks.forEach((track) => {
+      savedTracksSet.add(track.id);
+    });
+
+    isSetCached = true;
+    console.log(savedTracksSet);
+  } catch (error) {
+    console.error("Error populating saved track status:", error);
+  }
+};
+
+populateSavedTrackStatus();
 
 const getPlaylistItems = (playlistId, offset, limit) => {
   return new Promise((resolve, reject) => {

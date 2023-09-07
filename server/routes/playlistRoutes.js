@@ -31,7 +31,7 @@ const getPlaylistItems = (playlistId, offset, limit) => {
   });
 };
 
-const getMultipleTracksAudioFeatures = async (ids) => {
+const getMultipleTracksAudioFeatures = (ids) => {
   const trackIds = ids;
 
   return new Promise((resolve, reject) => {

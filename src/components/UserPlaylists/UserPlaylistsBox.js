@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Playlist from "./Playlist";
 import "./UserPlaylistsBox.css";
 
-function UserPlaylistsBox({ onPlaylistClick, cancelFetches }) {
+function UserPlaylistsBox({ setSelectedPlaylist, cancelFetches }) {
   const [inputValue, setInputValue] = useState("");
   const [playlists, setPlaylists] = useState(null);
   const [likedTracks, setlikedTracks] = useState(null);
@@ -108,7 +108,7 @@ function UserPlaylistsBox({ onPlaylistClick, cancelFetches }) {
             <Playlist
               key={item.id}
               playlist={item}
-              onClick={onPlaylistClick}
+              setSelectedPlaylist={setSelectedPlaylist}
               cancelFetches={cancelFetches}
             />
           ))

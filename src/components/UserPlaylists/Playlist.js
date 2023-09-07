@@ -4,7 +4,14 @@ function Playlist(props) {
   const handleClick = () => {
     //console.log(props.playlist);
     props.cancelFetches();
-    props.onClick(props.playlist);
+    props.setSelectedPlaylist(props.playlist);
+    props.setSelectedPlaylist({
+      id: props.playlist.id,
+      coverImg: props.playlist.images[0].url,
+      title: props.playlist.name,
+      owner: props.playlist.owner.display_name,
+      publicity: props.playlist.public,
+    });
   };
   return (
     <div className="container playlist" onClick={handleClick}>

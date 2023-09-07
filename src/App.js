@@ -7,9 +7,16 @@ import "./styles/App.css";
 
 function App() {
   const [token, setToken] = useState("");
-  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
-  //console.log("selectedPlaylist from app");
-  //console.log(selectedPlaylist);
+  const [selectedPlaylist, setSelectedPlaylist] = useState({
+    id: null,
+    coverImg: null,
+    title: null,
+    owner: null,
+    publicity: null,
+  });
+
+  console.log("selectedPlaylist from app");
+  console.log(selectedPlaylist);
 
   const playlistItemsController = new AbortController();
 
@@ -33,7 +40,7 @@ function App() {
     return (
       <div className="App">
         <LeftBoxes
-          onPlaylistClick={setSelectedPlaylist}
+          setSelectedPlaylist={setSelectedPlaylist}
           cancelFetches={cancelFetches}
         />
         <MainBox

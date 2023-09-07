@@ -13,7 +13,7 @@ function DisplayPlaylistInfo({ selectedPlaylist, playlistItemsController }) {
   return (
     <div className="Playlist">
       <InfoHeaderBox
-        playlist={selectedPlaylist}
+        selectedPlaylist={selectedPlaylist}
         setCombinedData={setCombinedData}
         combinedData={combinedData}
         original={original}

@@ -15,22 +15,30 @@
   width: 79.4vw;
 }
 
+.container.playlistInfo {
+  width: 79.4vw;
+  padding: 0.6vmax;
+  height: 100%;
+}
+
+.container.playlistInfo:hover {
+  cursor: default;
+}
+
 .main-container.playlistInfo {
   width: 100%;
+  height: 20vh;
   height: 20vh;
   flex-direction: row;
   background-color: #222;
   margin: 0;
   border-radius: 10px 10px 0px 0px;
   align-items: center;
+  overflow-y: visible;
 }
 
 .main-container.playlistInfo:hover {
-  overflow-y: hidden;
-}
-
-.container.playlistInfo {
-  width: 79.4vw;
+  overflow-y: visible;
 }
 
 .coverImg.track {
@@ -38,10 +46,15 @@
 }
 
 .coverImg.playlistInfo {
-  border-radius: 0px;
+  width: max-content;
+  height: 100%;
 }
 
 .everythingElse {
   width: 61vw;
   display: flex;
+}
+
+.imageAndTitle.playlistInfo {
+  height: 100%;
 }

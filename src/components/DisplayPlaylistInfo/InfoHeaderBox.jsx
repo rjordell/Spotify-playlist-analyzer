@@ -10,8 +10,8 @@ function InfoHeaderBox({
 }) {
   return (
     <div className="main-container playlistInfo">
-      <div className="container track">
-        <div className="imageAndTitle">
+      <div className="container playlistInfo">
+        <div className="imageAndTitle playlistInfo">
           <img
             src={playlist.images[0].url}
             className="coverImg playlistInfo"

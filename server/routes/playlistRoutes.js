@@ -16,39 +16,34 @@ var splitArrayIntoChunks = function (arr, chunkSize) {
 
 const getSavedTracks = (offset, limit) => {
   return new Promise((resolve, reject) => {
-    let allLikedTracks = [];
-    let data = null;
-
-    const fetchLikedTracks = (url) => {
-      request.get(
-        url,
-        {
-          headers: {
-            Authorization: `Bearer ${access_token}`,
-          },
+    request.get(
+      `https://api.spotify.com/v1/me/tracks?offset=${offset}&limit=${limit}`,
+      {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
         },
-        (error, response, body) => {
-          if (!error && response.statusCode === 200) {
-            data = JSON.parse(body);
-            allLikedTracks = allLikedTracks.concat(data.items);
-            if (data.next) {
-              fetchLikedTracks(data.next);
-            } else {
-              data.items = allLikedTracks;
-              resolve(data);
-            }
-          } else {
-            reject(error);
-          }
+      },
+      (error, response, body) => {
+        if (!error && response.statusCode === 200) {
+          const likedTracks = JSON.parse(body);
+          resolve(likedTracks);
+        } else {
+          reject(error);
         }
-      );
-    };
-
-    fetchLikedTracks(
-      `https://api.spotify.com/v1/me/tracks?offset=${offset}&limit=${limit}`
+      }
     );
   });
 };
+
+router.get("/getSavedTracks/", async (req, res) => {
+  try {
+    const { offset, limit } = req.query;
+    const savedTracks = await getSavedTracks(offset, limit);
+    res.json(savedTracks);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching saved tracks" });
+  }
+});
 
 const populateSavedTrackStatus = async () => {
   try {
@@ -59,13 +54,11 @@ const populateSavedTrackStatus = async () => {
     });
 
     isSetCached = true;
-    console.log(savedTracksSet);
+    console.log("finished");
   } catch (error) {
     console.error("Error populating saved track status:", error);
   }
 };
-
-populateSavedTrackStatus();
 
 const getPlaylistItems = (playlistId, offset, limit) => {
   return new Promise((resolve, reject) => {
@@ -183,6 +176,46 @@ const getMultipleTracksSavedStatus = async (ids) => {
     throw new Error("Error fetching tracks' saved status");
   }
 };
+
+router.get("/getCombinedSavedTracks/", async (req, res) => {
+  try {
+    const { offset, limit } = req.query;
+
+    const savedTracks = await getSavedTracks(offset, limit);
+
+    const artistIds = savedTracks.items
+      .map((item) => item.track.artists[0].id)
+      .join(",");
+
+    const trackIds = savedTracks.items.map((item) => item.track.id).join(",");
+
+    const artistsInfo = await getMultipleArtistsInfo(artistIds);
+
+    const tracksInfo = await getMultipleTracksAudioFeatures(trackIds);
+
+    savedTracks.items.map((item, index) => {
+      savedTracksSet.add(item.track.id);
+      const trackWithArtist = {
+        ...item.track,
+        artists: [artistsInfo.artists[index]],
+        ...tracksInfo.tracks[index],
+        saved: true,
+      };
+      savedTracks.items[index].track = trackWithArtist;
+    });
+    //console.log(savedTracksSet);
+    if (savedTracks.next === null) {
+      isSetCached = true;
+      console.log("finished");
+      console.log(savedTracksSet.size);
+    }
+    res.json(savedTracks);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Error fetching combined data saved tracks" });
+  }
+});
 
 router.get("/getCombinedData/:id", async (req, res) => {
   try {

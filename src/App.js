@@ -17,6 +17,8 @@ function App() {
     publicity: null,
   });
 
+  const [savedTracks, setSavedTracks] = useState(null);
+
   //console.log("selectedPlaylist from app");
   //console.log(selectedPlaylist);
 
@@ -37,15 +39,51 @@ function App() {
   }, []);
 
   useEffect(() => {
-    async function getCurrentUserProfile() {
-      const response = await fetch("/auth/user/getCurrentUsersProfile");
-      const json = await response.json();
-      //console.log(json);
-      setCurrentUser(json);
+    if (token) {
+      async function getCurrentUserProfile() {
+        const response = await fetch("/auth/user/getCurrentUsersProfile");
+        const json = await response.json();
+        //console.log(json);
+        setCurrentUser(json);
+      }
+      getCurrentUserProfile();
+      getCombinedSavedTracks(0);
     }
-
-    getCurrentUserProfile();
   }, [token]);
+
+  const getCombinedSavedTracks = async (offset, allItems = []) => {
+    try {
+      const response = await fetch(
+        `/auth/playlist/getCombinedSavedTracks/?limit=50&offset=${offset}`,
+        {
+          signal: playlistItemsController.signal,
+        }
+      );
+      const data = await response.json();
+      console.log("fetching liked tracks");
+      console.log(data);
+      if (data.error) {
+        setSavedTracks(null);
+      } else {
+        const updatedItems = [...allItems, ...data.items];
+        data.items = updatedItems;
+        setSavedTracks(data);
+        if (data.next) {
+          getCombinedSavedTracks(data.offset + 50, updatedItems);
+        } else {
+          console.log("finished");
+          console.log(savedTracks);
+        }
+      }
+    } catch (error) {
+      if (error.name === "AbortError") {
+        console.error("Error retrieving combined saved tracks:", error);
+      } else {
+        console.error("Error retrieving combined saved tracks:", error);
+        setSavedTracks(null);
+      }
+    }
+  };
 
   if (token === "") {
     return <Login />;

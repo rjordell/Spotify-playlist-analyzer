@@ -45,21 +45,6 @@ router.get("/getSavedTracks/", async (req, res) => {
   }
 });
 
-const populateSavedTrackStatus = async () => {
-  try {
-    const savedTracks = await getSavedTracks();
-
-    savedTracks.forEach((track) => {
-      savedTracksSet.add(track.id);
-    });
-
-    isSetCached = true;
-    console.log("finished");
-  } catch (error) {
-    console.error("Error populating saved track status:", error);
-  }
-};
-
 const getPlaylistItems = (playlistId, offset, limit) => {
   return new Promise((resolve, reject) => {
     request.get(
@@ -206,8 +191,6 @@ router.get("/getCombinedSavedTracks/", async (req, res) => {
     //console.log(savedTracksSet);
     if (savedTracks.next === null) {
       isSetCached = true;
-      console.log("finished");
-      console.log(savedTracksSet.size);
     }
     res.json(savedTracks);
   } catch (error) {
@@ -238,27 +221,33 @@ router.get("/getCombinedData/:id", async (req, res) => {
       .map((item) => item.track.artists[0].id)
       .join(",");
 
-    const trackIds = playlistTracks.items
-      .map((item) => item.track.id)
-      .join(",");
+    const trackIds = playlistTracks.items.map((item) => item.track.id);
+
+    const trackIdsString = trackIds.join(",");
 
     const artistsInfo = await getMultipleArtistsInfo(artistIds);
 
-    const tracksInfo = await getMultipleTracksAudioFeatures(trackIds);
+    const tracksInfo = await getMultipleTracksAudioFeatures(trackIdsString);
 
-    const savedStatus = await getMultipleTracksSavedStatus(trackIds);
+    let savedStatus;
+    if (isSetCached) {
+      savedStatus = trackIds.map((trackId) => savedTracksSet.has(trackId));
+    } else {
+      savedStatus = await getMultipleTracksSavedStatus(trackIdsString);
+    }
 
     playlistTracks.items.map((item, index) => {
       const trackWithArtist = {
         ...item.track,
         artists: [artistsInfo.artists[index]],
         ...tracksInfo.tracks[index],
-        saved: savedStatus.tracks[index],
+        saved: savedStatus[index],
       };
       playlistTracks.items[index].track = trackWithArtist;
     });
     res.json(playlistTracks);
   } catch (error) {
+    console.error("Error in route handler:", error);
     res.status(500).json({ error: "Error fetching combined data" });
   }
 });

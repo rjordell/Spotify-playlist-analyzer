@@ -60,8 +60,6 @@ function App() {
         }
       );
       const data = await response.json();
-      console.log("fetching liked tracks");
-      console.log(data);
       if (data.error) {
         setSavedTracks(null);
       } else {
@@ -72,7 +70,6 @@ function App() {
           getCombinedSavedTracks(data.offset + 50, updatedItems);
         } else {
           console.log("finished");
-          console.log(savedTracks);
         }
       }
     } catch (error) {

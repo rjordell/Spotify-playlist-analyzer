@@ -25,42 +25,6 @@ function UserPlaylistsBox({ setSelectedPlaylist, cancelFetches }) {
     }
   };
 
-  const getLikedTracks = async (offset) => {
-    try {
-      const response = await fetch(
-        `/auth/user/getLikedTracks/?limit=50&offset=${offset}`
-      );
-      const data = await response.json();
-      if (data.error) {
-        setlikedTracks(null);
-      } else {
-        setlikedTracks(data);
-      }
-      console.log("liked tracks");
-      console.log(data);
-    } catch (error) {
-      console.error("Error retrieving liked tracks:", error);
-      setlikedTracks(null);
-    }
-  };
-
-  const getLikedTracks2 = async (offset) => {
-    try {
-      const response = await fetch(`/auth/user/getLikedTracks2`);
-      const data = await response.json();
-      if (data.error) {
-        setlikedTracks(null);
-      } else {
-        setlikedTracks(data);
-      }
-      console.log("liked tracks");
-      console.log(data);
-    } catch (error) {
-      console.error("Error retrieving liked tracks:", error);
-      setlikedTracks(null);
-    }
-  };
-
   const getUsersPlaylists = async (id) => {
     setPlaylists(null);
     //console.log("called getUsersPlaylists");
@@ -82,7 +46,6 @@ function UserPlaylistsBox({ setSelectedPlaylist, cancelFetches }) {
 
   useEffect(() => {
     getCurrentUsersPlaylists();
-    getLikedTracks2();
   }, []);
 
   return (

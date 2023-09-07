@@ -151,47 +151,4 @@ router.get("/getCurrentUsersPlaylists/", (req, res) => {
   );
 });
 
-router.get("/getLikedTracks/", async (req, res) => {
-  try {
-    const { offset, limit } = req.query;
-    const likedTracks = await getLikedTracks(offset, limit);
-    res.json(likedTracks);
-  } catch (error) {
-    res.status(500).json({ error: "Error fetching liked tracks" });
-  }
-});
-
-router.get("/getLikedTracks2/", (req, res) => {
-  let allLikedTracks = [];
-  let data = null;
-
-  const fetchLikedTracks = (url) => {
-    request.get(
-      url,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      },
-      (error, response, body) => {
-        if (!error && response.statusCode === 200) {
-          data = JSON.parse(body);
-          allLikedTracks = allLikedTracks.concat(data.items);
-          //console.log(data);
-          if (data.next) {
-            fetchLikedTracks(data.next);
-          } else {
-            data.items = allLikedTracks;
-            res.json(data);
-          }
-        } else {
-          res.status(response.statusCode).json({ error: "Invalid" });
-        }
-      }
-    );
-  };
-
-  fetchLikedTracks(`https://api.spotify.com/v1/me/tracks?offset=0&limit=50`);
-});
-
 module.exports = router;

@@ -97,12 +97,12 @@ body {
 .MainBox {
   display: flex;
   align-items: center;
-  width: 80vw;
+  width: 79vw;
   height: 89vh;
   margin: 1vmin;
   margin-bottom: 0;
   flex-direction: column;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 2.5vmin;
   background-color: #111;
 }
@@ -110,14 +110,14 @@ body {
 .LeftBoxes {
   display: flex;
   align-items: center;
-  width: 19vw;
+  width: 20vw;
   height: 89vh;
   margin: 1vh;
   margin-bottom: 0vh;
   margin-right: 0;
   flex-direction: column;
   background-color: #080808;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 2.5vmin;
 }
 
@@ -126,7 +126,7 @@ body {
   width: 100%;
   margin-bottom: 1vh;
   background-color: #111;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .WebPlayer {
@@ -167,8 +167,8 @@ body {
   overflow-y: hidden;
   margin: 0.3vmax;
   margin-right: 0;
-  margin-bottom: 0;
   height: 68.5vh;
+  height: 100%;
   justify-content: left;
   flex-direction: column;
   border-radius: 0px 0px 10px 10px;
@@ -191,7 +191,7 @@ body {
 }
 
 .main-container::-webkit-scrollbar-track {
-  background-color: #111;
+  background-color: #11111100;
 }
 
 .container {
@@ -236,20 +236,21 @@ body {
 
 .imageAndTitle {
   display: flex;
-  width: 18.1vw;
+  width: 19vmax;
   height: 2.5vmax;
   justify-content: left;
   text-align: left;
 }
 
 .coverImg {
+  border-radius: 5px;
   width: 2.5vmax;
   height: 2.5vmax;
 }
 
 .now-playing__side {
-  height: 2.5vmax;
-  width: 15.1vw;
+  height: 100%;
+  width: 16vmax;
   margin-left: 0.5vmax;
   display: flex;
   flex-direction: column;

@@ -3,13 +3,14 @@ import { useState, useEffect } from "react";
 import Playlist from "./Playlist";
 import "./UserPlaylistsBox.css";
 
-function UserPlaylistsBox({ onPlaylistClick, cancelFetches }) {
+function UserPlaylistsBox({ setSelectedPlaylist, cancelFetches }) {
   const [inputValue, setInputValue] = useState("");
   const [playlists, setPlaylists] = useState(null);
+  const [likedTracks, setlikedTracks] = useState(null);
 
   const getCurrentUsersPlaylists = async () => {
     try {
-      const response = await fetch("/auth/getCurrentUsersPlaylists/");
+      const response = await fetch("/auth/user/getCurrentUsersPlaylists/");
       const data = await response.json();
       if (data.error) {
         setPlaylists(null);
@@ -28,7 +29,7 @@ function UserPlaylistsBox({ onPlaylistClick, cancelFetches }) {
     setPlaylists(null);
     //console.log("called getUsersPlaylists");
     try {
-      const response = await fetch("/auth/getUsersPlaylists/" + id);
+      const response = await fetch("/auth/user/getUsersPlaylists/" + id);
       const data = await response.json();
       if (data.error) {
         setPlaylists(null);
@@ -70,7 +71,7 @@ function UserPlaylistsBox({ onPlaylistClick, cancelFetches }) {
             <Playlist
               key={item.id}
               playlist={item}
-              onClick={onPlaylistClick}
+              setSelectedPlaylist={setSelectedPlaylist}
               cancelFetches={cancelFetches}
             />
           ))

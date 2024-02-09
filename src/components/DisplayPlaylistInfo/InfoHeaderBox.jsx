@@ -2,7 +2,7 @@ import React from "react";
 import SortBy from "./SortBy";
 
 function InfoHeaderBox({
-  playlist,
+  selectedPlaylist,
   setCombinedData,
   combinedData,
   original,
@@ -10,17 +10,18 @@ function InfoHeaderBox({
 }) {
   return (
     <div className="main-container playlistInfo">
-      <div className="container track">
-        <div className="imageAndTitle">
+      <div className="container playlistInfo">
+        <div className="imageAndTitle playlistInfo">
           <img
-            src={playlist.images[0].url}
+            src={selectedPlaylist.coverImg}
             className="coverImg playlistInfo"
             alt=""
           />
           <div className="now-playing__side">
-            <div className="containerHeader">{playlist.name}</div>
+            <div className="containerHeader">{selectedPlaylist.title}</div>
             <div className="containerSubheader">
-              {combinedData ? combinedData.total : 0} Songs
+              {selectedPlaylist.owner} • {combinedData ? combinedData.total : 0}{" "}
+              Songs
             </div>
           </div>
         </div>

@@ -1,3 +1,1 @@
-tryig to make a react app lol
-
-goal is to recreate the spotify app with additional functionality
+Goal is to recreate the spotify app with additional functionality from the spotify api

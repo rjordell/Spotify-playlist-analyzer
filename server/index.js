@@ -1,7 +1,7 @@
+const redis = require('redis');
 const express = require("express");
 const request = require("request");
 const dotenv = require("dotenv");
-const redis = require('redis');
 
 const port = 5000;
 
@@ -29,10 +29,6 @@ var app = express();
 
 const playlistRoutes = require("./routes/playlistRoutes");
 const userRoutes = require("./routes/userRoutes");
-
-app.use("/auth/playlist", playlistRoutes);
-app.use("/auth/user", userRoutes);
-
 const redisClient = redis.createClient({
   host: 'localhost',
   port: 6379,
@@ -41,6 +37,10 @@ const redisClient = redis.createClient({
 redisClient.on('error', (err) => {
   console.log('Redis error: ', err);
 });
+
+app.use("/auth/playlist", playlistRoutes);
+app.use("/auth/user", userRoutes);
+
 
 app.get("/auth/login", (req, res) => {
   var scope =
@@ -139,3 +139,5 @@ app.get("/auth/token", (req, res) => {
 app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}`);
 });
+
+module.exports = redisClient;

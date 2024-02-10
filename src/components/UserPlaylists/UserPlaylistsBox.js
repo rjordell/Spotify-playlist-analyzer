@@ -29,12 +29,12 @@ function UserPlaylistsBox({ setSelectedPlaylist, cancelFetches }) {
     setPlaylists(null);
     //console.log("called getUsersPlaylists");
     try {
-      const response = await fetch("/auth/user/getUsersPlaylists/" + id);
+      const response = await fetch("/auth/user/getUsersPlaylists2/" + id);
       const data = await response.json();
       if (data.error) {
         setPlaylists(null);
       } else {
-        //console.log("received data");
+        console.log("USERPLAYLISTSBOX.JS: received data from backend from getUsersPlaylists ", data);
         setPlaylists(data);
       }
       //console.log(data);

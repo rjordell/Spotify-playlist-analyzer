@@ -47,7 +47,7 @@ function App() {
         setCurrentUser(json);
       }
       getCurrentUserProfile();
-      getCombinedSavedTracks(0);
+      //getCombinedSavedTracks(0);
     }
   }, [token]);
 

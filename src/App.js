@@ -69,7 +69,7 @@ function App() {
         if (data.next) {
           getCombinedSavedTracks(data.offset + 50, updatedItems);
         } else {
-          console.log("finished");
+          console.log("APP.JS: finished caching liked tracks?");
         }
       }
     } catch (error) {

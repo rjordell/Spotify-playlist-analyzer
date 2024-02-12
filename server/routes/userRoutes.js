@@ -1,7 +1,8 @@
 const express = require("express");
 const request = require("request");
 const router = express.Router();
-const redisClient = require("../index");
+const { redisClient } = require("../index");
+console.log("log right after import: ", redisClient)
 
 const getLikedTracks = (offset, limit) => {
   return new Promise((resolve, reject) => {

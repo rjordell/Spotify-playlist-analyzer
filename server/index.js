@@ -1,7 +1,7 @@
-const redis = require('redis');
 const express = require("express");
 const request = require("request");
 const dotenv = require("dotenv");
+const { createClient } = require('redis');
 
 const port = 5000;
 
@@ -14,6 +14,20 @@ var spotify_client_secret = process.env.SPOTIFY_CLIENT_SECRET;
 
 var spotify_redirect_uri = "http://localhost:3000/auth/callback";
 
+var app = express();
+
+const playlistRoutes = require("./routes/playlistRoutes");
+//const userRoutes = require("./routes/userRoutes");
+
+const redisClient = createClient({ url: 'redis://localhost:6379' });
+redisClient.connect().then(() => {
+  const userRoutes = require("./routes/userRoutes")(redisClient); // Pass the connected redisClient
+  app.use("/auth/user", userRoutes);
+});
+
+app.use("/auth/playlist", playlistRoutes);
+//app.use("/auth/user", userRoutes);
+
 var generateRandomString = function (length) {
   var text = "";
   var possible =
@@ -24,23 +38,6 @@ var generateRandomString = function (length) {
   }
   return text;
 };
-
-var app = express();
-
-const playlistRoutes = require("./routes/playlistRoutes");
-const userRoutes = require("./routes/userRoutes");
-const redisClient = redis.createClient({
-  host: 'localhost',
-  port: 6379,
-});
-
-redisClient.on('error', (err) => {
-  console.log('Redis error: ', err);
-});
-
-app.use("/auth/playlist", playlistRoutes);
-app.use("/auth/user", userRoutes);
-
 
 app.get("/auth/login", (req, res) => {
   var scope =
@@ -140,4 +137,5 @@ app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}`);
 });
 
-module.exports = redisClient;
+module.exports = { redisClient };
+

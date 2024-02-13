@@ -16,17 +16,13 @@ var spotify_redirect_uri = "http://localhost:3000/auth/callback";
 
 var app = express();
 
-const playlistRoutes = require("./routes/playlistRoutes");
-//const userRoutes = require("./routes/userRoutes");
-
-const redisClient = createClient({ url: 'redis://localhost:6379' });
+const redisClient = createClient({ url: 'redis://127.0.0.1:6379' });
 redisClient.connect().then(() => {
-  const userRoutes = require("./routes/userRoutes")(redisClient); // Pass the connected redisClient
+  const playlistRoutes = require("./routes/playlistRoutes");
+  const userRoutes = require("./routes/userRoutes");  
+  app.use("/auth/playlist", playlistRoutes);
   app.use("/auth/user", userRoutes);
 });
-
-app.use("/auth/playlist", playlistRoutes);
-//app.use("/auth/user", userRoutes);
 
 var generateRandomString = function (length) {
   var text = "";

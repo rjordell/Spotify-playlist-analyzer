@@ -103,25 +103,26 @@ router.get("/getUsersPlaylists/:id", (req, res) => {
 
 router.get("/getUsersPlaylists2/:id", async (req, res) => {
   const userId = req.params.id;
-
   // Check the cache for the user's playlists
-  console.log("userroutes.js: ", redisClient, typeof(redisClient))
-  redisClient.get(`users:${userId}`, async (err, cachedData) => {
-    if (err) {
-      console.error("Redis error:", err);
-      return res.status(500).json({ error: "Internal server error" });
-    }
-
+  //console.log("USERROUTES.JS: called getuserspalyslits2")
+  redisClient.get(`users:${userId}`).then((cachedData) => {
+    //console.log("inside of get");
     if (cachedData) {
       // If user's playlists are found in cache, return cached data
+      //console.log("USERROUTES.JS: found palyists in cache")
       return res.json(JSON.parse(cachedData));
     } else {
+      //console.log("USERROUTES.JS: didnt find palyists")
       try {
+        //console.log("USERROUTES.JS: lookign thru api ")
         // If user's playlists are not found in cache, fetch from Spotify API
-        const playlists = await fetchUserPlaylists(userId);
-        // Cache the fetched playlists data
-        redisClient.set(`users:${userId}`, JSON.stringify(playlists));
-        res.json(playlists);
+        fetchUserPlaylists(userId).then((playlists) => {
+          // Cache the fetched playlists data
+          redisClient.set(`users:${userId}`, JSON.stringify(playlists));
+          //console.log("USERROUTES.JS: retrieved from api ", redisClient)
+          //console.log("USERROUTES.JS: retrieved from api")
+          res.json(playlists);
+        });
       } catch (error) {
         console.error("Error fetching user's playlists:", error);
         res.status(500).json({ error: "Error fetching user's playlists" });

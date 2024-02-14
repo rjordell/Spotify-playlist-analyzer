@@ -43,7 +43,7 @@ function App() {
       async function getCurrentUserProfile() {
         const response = await fetch("/auth/user/getCurrentUsersProfile");
         const json = await response.json();
-        //console.log(json);
+        console.log(json);
         setCurrentUser(json);
       }
       getCurrentUserProfile();
@@ -87,10 +87,13 @@ function App() {
   } else {
     return (
       <div className="App">
-        <LeftBoxes
-          setSelectedPlaylist={setSelectedPlaylist}
-          cancelFetches={cancelFetches}
-        />
+        {currentUser && ( 
+          <LeftBoxes
+            setSelectedPlaylist={setSelectedPlaylist}
+            cancelFetches={cancelFetches}
+            currentUser={currentUser} // Passing currentUser as a prop
+          />
+        )}
         <MainBox
           selectedPlaylist={selectedPlaylist}
           playlistItemsController={playlistItemsController}

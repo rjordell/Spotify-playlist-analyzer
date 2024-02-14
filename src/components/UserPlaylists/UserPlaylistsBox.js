@@ -3,14 +3,14 @@ import { useState, useEffect } from "react";
 import Playlist from "./Playlist";
 import "./UserPlaylistsBox.css";
 
-function UserPlaylistsBox({ setSelectedPlaylist, cancelFetches }) {
+function UserPlaylistsBox({ setSelectedPlaylist, cancelFetches, currentUser }) {
   const [inputValue, setInputValue] = useState("");
   const [playlists, setPlaylists] = useState(null);
   const [likedTracks, setlikedTracks] = useState(null);
 
   const getCurrentUsersPlaylists = async () => {
     try {
-      const response = await fetch("/auth/user/getCurrentUsersPlaylists/");
+      const response = await fetch("/auth/user/getUsersPlaylists/" + currentUser.id);
       const data = await response.json();
       if (data.error) {
         setPlaylists(null);
@@ -29,7 +29,7 @@ function UserPlaylistsBox({ setSelectedPlaylist, cancelFetches }) {
     setPlaylists(null);
     //console.log("called getUsersPlaylists");
     try {
-      const response = await fetch("/auth/user/getUsersPlaylists2/" + id);
+      const response = await fetch("/auth/user/getUsersPlaylists/" + id);
       const data = await response.json();
       if (data.error) {
         setPlaylists(null);

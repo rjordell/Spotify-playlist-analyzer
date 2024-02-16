@@ -43,20 +43,48 @@ function TrackBox({
       }
     }
   };
+  const getCombinedData2 = async (offset, allItems = []) => {
+    try {
+      const response = await fetch(
+        `/auth/playlist/getCombinedData2/${playlistId}`,
+        {
+          signal: playlistItemsController.signal,
+        }
+      );
+      const data = await response.json();
+      console.log("TRACKBOX.JS: data from getCombinedData2 ", data)
+      if (data.error) {
+        setCombinedData(null);
+        setOriginalItems(null);
+      } else {
+        setCombinedData(data.tracks);
+        setOriginalItems(data);
+        setDisplaySort(true);
+      }
+    } catch (error) {
+      if (error.name === "AbortError") {
+        console.error("Error retrieving combined data:", error);
+      } else {
+        console.error("Error retrieving combined data:", error);
+        setCombinedData(null);
+        setOriginalItems(null);
+      }
+    }
+  };
 
   useEffect(() => {
     if (playlistId) {
       setCombinedData(null);
       setOriginalItems(null);
       setDisplaySort(false);
-      getCombinedData(0);
+      getCombinedData2();
     }
   }, [playlistId]);
 
   return (
     <div className="main-container tracks">
       {combinedData?.items.map((item) => (
-        <Track key={item.track} track={item} />
+        <Track key={item.track} track={item.track} />
       ))}
     </div>
   );

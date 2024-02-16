@@ -10,7 +10,7 @@ function UserPlaylistsBox({ setSelectedPlaylist, cancelFetches, currentUser }) {
 
   const getCurrentUsersPlaylists = async () => {
     try {
-      const response = await fetch("/auth/user/getUsersPlaylists/" + currentUser.id);
+      const response = await fetch("/auth/user/getUsersPlaylists2/" + currentUser.id);
       const data = await response.json();
       if (data.error) {
         setPlaylists(null);
@@ -29,7 +29,7 @@ function UserPlaylistsBox({ setSelectedPlaylist, cancelFetches, currentUser }) {
     setPlaylists(null);
     //console.log("called getUsersPlaylists");
     try {
-      const response = await fetch("/auth/user/getUsersPlaylists/" + id);
+      const response = await fetch("/auth/user/getUsersPlaylists2/" + id);
       const data = await response.json();
       if (data.error) {
         setPlaylists(null);

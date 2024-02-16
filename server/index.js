@@ -17,6 +17,7 @@ var spotify_redirect_uri = "http://localhost:3000/auth/callback";
 var app = express();
 
 const redisClient = createClient({ url: 'redis://127.0.0.1:6379' });
+
 redisClient.connect().then(() => {
   const playlistRoutes = require("./routes/playlistRoutes");
   const userRoutes = require("./routes/userRoutes");  

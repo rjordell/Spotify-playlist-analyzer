@@ -2,7 +2,6 @@ const express = require("express");
 const request = require("request");
 const router = express.Router();
 const { redisClient } = require("../index");
-console.log("log right after import: ", redisClient)
 
 const getLikedTracks = (offset, limit) => {
   return new Promise((resolve, reject) => {
@@ -76,6 +75,35 @@ router.get("/getUsersPlaylists/:id", async (req, res) => {
       }
     }
   });
+});
+
+router.get("/getUsersPlaylists2/:id", async (req, res) => {
+  const userId = req.params.id;
+  //console.log("inside of getUsersPlaylists2");
+  // Check the cache for the user's playlists
+  const cachedData = await redisClient.get(`users:${userId}`);
+
+  if (cachedData) {
+    // If user's playlists are found in cache, return cached data
+    //console.log("USERROUTES.JS: found palyists in cache")
+    return res.json(JSON.parse(cachedData));
+  } else {
+    //console.log("USERROUTES.JS: didnt find palyists")
+    try {
+      //console.log("USERROUTES.JS: lookign thru api ")
+      // If user's playlists are not found in cache, fetch from Spotify API
+      fetchUserPlaylists(userId).then((playlists) => {
+        // Cache the fetched playlists data
+        redisClient.set(`users:${userId}`, JSON.stringify(playlists));
+        //console.log("USERROUTES.JS: retrieved from api ", redisClient)
+        //console.log("USERROUTES.JS: retrieved from api")
+        res.json(playlists);
+      });
+    } catch (error) {
+      console.error("Error fetching user's playlists:", error);
+      res.status(500).json({ error: "Error fetching user's playlists" });
+    }
+  }
 });
 
 async function fetchUserPlaylists(userId) {

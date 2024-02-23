@@ -60,11 +60,11 @@ async function fetchAndCachePlaylistInfo(playlistId) {
   let cachedData = await redisClient.get(`playlists:${playlistId}`);
   if (cachedData) {
     cachedData = JSON.parse(cachedData);
-    console.log("playlist", playlist.name,"found in cache!")
+    //console.log("playlist", playlist.name,"found in cache!")
   }
 
   if (!cachedData || cachedData.snapshot_id !== playlist.snapshot_id) {
-    console.log("playlist", playlist.name,"not found in cache, or cache is out of date")
+    //console.log("playlist", playlist.name,"not found in cache, or cache is out of date")
     redisClient.set(`playlists:${playlistId}`, JSON.stringify(playlist));
   } 
 }
@@ -88,7 +88,7 @@ async function fetchAndUpdateCachedPlaylist(playlistId) {
 
     // Fetch additional tracks until the playlist is complete
     while (remainingTracks > 0) {
-      console.log("playlist", playlist.name,"does not have all tracks yet, fetching more")
+      //console.log("playlist", playlist.name,"does not have all tracks yet, fetching more")
       const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?offset=${offset}&limit=100`, {
         headers: { Authorization: `Bearer ${access_token}` },
       });
@@ -104,7 +104,7 @@ async function fetchAndUpdateCachedPlaylist(playlistId) {
   // Update the cache with the complete playlist
   redisClient.set(`playlists:${playlistId}`, JSON.stringify(playlist));
 
-  let x = 0
+  //let x = 0
   // Iterate through every track in tracks and check if the trackId is in the Redis cache 'tracks:trackId'
   // If the track is cached, retrieve it from the cache; otherwise, cache the track
   for (let i = 0; i < tracks.length; i++) {
@@ -117,11 +117,11 @@ async function fetchAndUpdateCachedPlaylist(playlistId) {
     } else {
       // If the track is not in the cache, add it to the cache
       //console.log("track", tracks[i].track.name,"not found in cache")
-      x++;
+      //x++;
       redisClient.set(`tracks:${trackId}`, JSON.stringify(tracks[i].track));
     }
   }
-  console.log(x,"tracks not found in cache out of", tracks.length)
+  //console.log(x,"tracks not found in cache out of", tracks.length)
 }
 
 /**
@@ -164,10 +164,10 @@ async function fetchAndUpdateCachedArtists(playlistId) {
 async function updateTracksWithArtistInfo(playlist) {
   const artistIdsToCache = new Set();
 
-  let x = 0
-  let y = 0
-  let z = 0
-  let flag = false
+  // let x = 0
+  // let y = 0
+  // let z = 0
+  // let flag = false
   // Iterate through every track in the playlist
   for (const trackItem of playlist.tracks.items) {
     const trackId = trackItem.track.id;
@@ -177,29 +177,29 @@ async function updateTracksWithArtistInfo(playlist) {
     // Iterate through every artist in the track
     for (let j = 0; j < trackItem.track.artists.length; j++) {
       const artist = track.artists[j];
-      y++;
+      //y++;
       // Check if the artist has the 'popularity' field
       if (!artist.popularity) {
-        flag = true;
+        //flag = true;
         const cachedArtist = await redisClient.get(`artists:${artist.id}`);
         if (cachedArtist) {
           track.artists[j] = JSON.parse(cachedArtist);
         } else {
-          z++;
+          //z++;
           artistIdsToCache.add(artist.id);
         }
       }
     }
-    if (flag == true){
-      x++;
-      console.log("track",track.name,"did not have a artist info field")
-      console.log(track)
-      flag = false;
-    }
+    // if (flag == true){
+    //   x++;
+    //   console.log("track",track.name,"did not have a artist info field")
+    //   console.log(track)
+    //   flag = false;
+    // }
     redisClient.set(`tracks:${trackId}`, JSON.stringify(track));
   }
-  console.log(x, "tracks did not have all of their artist info completed out of",playlist.tracks.items.length,)
-  console.log(z, "artists were not cached out of",y)
+  //console.log(x, "tracks did not have all of their artist info completed out of",playlist.tracks.items.length,)
+  //console.log(z, "artists were not cached out of",y)
   return artistIdsToCache;
 }
 
@@ -222,13 +222,13 @@ async function fetchAndUpdateTracksLikedStatus(playlistId) {
 
     // Check if the track has the 'liked' field
     if (!track.hasOwnProperty('liked')) {
-      console.log("track",track.name,"did not have a liked status field")
-      console.log(track)
+      // console.log("track",track.name,"did not have a liked status field")
+      // console.log(track)
       tracksToCache.add(track);
     }
   }
 
-  console.log(tracksToCache.size,"tracks did not have a liked status field out of", playlist.tracks.items.length)
+  //console.log(tracksToCache.size,"tracks did not have a liked status field out of", playlist.tracks.items.length)
   // Fetch liked status for uncached tracks in batches of 50
   if (tracksToCache.size > 0) {
     const batches = splitArrayIntoChunks(Array.from(tracksToCache), 50);
@@ -271,7 +271,7 @@ async function fetchAndUpdateTracksFeatures(playlistId) {
     }
   }
 
-  console.log(tracksToCache.size,"tracks did not have an audio features field out of", playlist.tracks.items.length)
+  //console.log(tracksToCache.size,"tracks did not have an audio features field out of", playlist.tracks.items.length)
   // Fetch audio features for uncached tracks in batches of 100
   if (tracksToCache.size > 0) {
     const batches = splitArrayIntoChunks(Array.from(tracksToCache), 100);

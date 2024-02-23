@@ -10,49 +10,16 @@ function TrackBox({
   setDisplaySort,
   playlistItemsController,
 }) {
-  const getCombinedData = async (offset, allItems = []) => {
+  const getCombinedData = async () => {
     try {
       const response = await fetch(
-        `/auth/playlist/getCombinedData/${playlistId}?limit=100&offset=${offset}`,
+        `/auth/playlist/getCombinedData/${playlistId}`,
         {
           signal: playlistItemsController.signal,
         }
       );
       const data = await response.json();
-      if (data.error) {
-        setCombinedData(null);
-        setOriginalItems(null);
-      } else {
-        const updatedItems = [...allItems, ...data.items];
-        data.items = updatedItems;
-        setCombinedData(data);
-        setOriginalItems(data);
-        if (data.next) {
-          getCombinedData(data.offset + 100, updatedItems);
-        } else {
-          setDisplaySort(true);
-        }
-      }
-    } catch (error) {
-      if (error.name === "AbortError") {
-        console.error("Error retrieving combined data:", error);
-      } else {
-        console.error("Error retrieving combined data:", error);
-        setCombinedData(null);
-        setOriginalItems(null);
-      }
-    }
-  };
-  const getCombinedData2 = async (offset, allItems = []) => {
-    try {
-      const response = await fetch(
-        `/auth/playlist/getCombinedData2/${playlistId}`,
-        {
-          signal: playlistItemsController.signal,
-        }
-      );
-      const data = await response.json();
-      console.log("TRACKBOX.JS: data from getCombinedData2 ", data)
+      console.log("TRACKBOX.JS: data from getCombinedData ", data)
       if (data.error) {
         setCombinedData(null);
         setOriginalItems(null);
@@ -77,7 +44,7 @@ function TrackBox({
       setCombinedData(null);
       setOriginalItems(null);
       setDisplaySort(false);
-      getCombinedData2();
+      getCombinedData();
     }
   }, [playlistId]);
 

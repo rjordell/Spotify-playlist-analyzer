@@ -1,8 +1,7 @@
 import React from "react";
 
 function Track({ track }) {
-  //console.log("track");
-  //console.log(track);
+  console.log("TRACK.JS: track ", track);
   if (track.artists[0] && track.audio_features !== undefined) {
     return (
       <div className="container track">

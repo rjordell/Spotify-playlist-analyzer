@@ -192,6 +192,8 @@ async function updateTracksWithArtistInfo(playlist) {
     }
     if (flag == true){
       x++;
+      console.log("track",track.name,"did not have a artist info field")
+      console.log(track)
       flag = false;
     }
     redisClient.set(`tracks:${trackId}`, JSON.stringify(track));
@@ -219,7 +221,9 @@ async function fetchAndUpdateTracksLikedStatus(playlistId) {
     const track = JSON.parse(cachedTrack);
 
     // Check if the track has the 'liked' field
-    if (!track.liked) {
+    if (!track.hasOwnProperty('liked')) {
+      console.log("track",track.name,"did not have a liked status field")
+      console.log(track)
       tracksToCache.add(track);
     }
   }

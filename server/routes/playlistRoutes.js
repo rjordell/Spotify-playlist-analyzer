@@ -47,10 +47,10 @@ router.get("/getSavedTracks/", async (req, res) => {
 });
 
 /**
- * Fetches playlist information from the Spotify API and caches it in Redis.
+ * Ensures that the playlist cached in Redis is up to date and caching the most recent version if necessary.
  * @param {string} playlistId - The ID of the playlist.
  */
-async function fetchAndCachePlaylistInfo(playlistId) {
+async function fetchAndUpdatePlaylistInfo(playlistId) {
   const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
     headers: { Authorization: `Bearer ${access_token}` },
   });
@@ -60,11 +60,12 @@ async function fetchAndCachePlaylistInfo(playlistId) {
   let cachedData = await redisClient.get(`playlists:${playlistId}`);
   if (cachedData) {
     cachedData = JSON.parse(cachedData);
-    //console.log("playlist", playlist.name,"found in cache!")
+    console.log("playlist", playlist.name,"found in cache!")
+    //console.log(playlist)
   }
 
   if (!cachedData || cachedData.snapshot_id !== playlist.snapshot_id) {
-    //console.log("playlist", playlist.name,"not found in cache, or cache is out of date")
+    console.log("playlist", playlist.name,"not found in cache, or cache is out of date")
     redisClient.set(`playlists:${playlistId}`, JSON.stringify(playlist));
   } 
 }
@@ -74,7 +75,7 @@ async function fetchAndCachePlaylistInfo(playlistId) {
  * updating the cache accordingly, and retrieving or caching individual tracks.
  * @param {string} playlistId - The ID of the playlist.
  */
-async function fetchAndUpdateCachedPlaylist(playlistId) {
+async function ensurePlaylistCompleteness(playlistId) {
   const cachedPlaylist = await redisClient.get(`playlists:${playlistId}`);
   const playlist = JSON.parse(cachedPlaylist);
   //console.log("at fetchAndUpdateCachedPlaylist", playlist)
@@ -101,39 +102,23 @@ async function fetchAndUpdateCachedPlaylist(playlistId) {
     }
   }
 
+  playlist.tracks.items = tracks
   // Update the cache with the complete playlist
   redisClient.set(`playlists:${playlistId}`, JSON.stringify(playlist));
-
-  //let x = 0
-  // Iterate through every track in tracks and check if the trackId is in the Redis cache 'tracks:trackId'
-  // If the track is cached, retrieve it from the cache; otherwise, cache the track
-  for (let i = 0; i < tracks.length; i++) {
-    const trackId = tracks[i].track.id;
-    //console.log("track ", tracks[i].track.name," looking in cache")
-    const cachedTrack = await redisClient.get(`tracks:${trackId}`);
-    if (cachedTrack) {
-      tracks[i].track = JSON.parse(cachedTrack);
-      //console.log("track", tracks[i].track.name,"found in cache!")
-    } else {
-      // If the track is not in the cache, add it to the cache
-      //console.log("track", tracks[i].track.name,"not found in cache")
-      //x++;
-      redisClient.set(`tracks:${trackId}`, JSON.stringify(tracks[i].track));
-    }
-  }
-  //console.log(x,"tracks not found in cache out of", tracks.length)
+  await updatePlaylistWithTracks(playlistId);
 }
 
 /**
  * Fetches and updates the artist information for all the artists in all the tracks in the playlist.
  * Retrieves artist information for each track in the playlist from the Redis cache and Spotify API,
- * updates the cache for the artists accordingly, and updates the cached tracks in the playlist with the latest artist information.
+ * updates the cache for the artists accordingly, and updates the cached tracks in the playlist with the latest artist information,
+ * and updated the cached playlist with the updated cached tracks.
  * @param {string} playlistId - The ID of the playlist.
  */
-async function fetchAndUpdateCachedArtists(playlistId) {
+async function fetchAndUpdateTracksArtistInfo(playlistId) {
   const cachedPlaylist = await redisClient.get(`playlists:${playlistId}`);
   const playlist = JSON.parse(cachedPlaylist);
-  const artistIdsToCache = await updateTracksWithArtistInfo(playlist);
+  const artistIdsToCache = await updateCachedTracksWithCachedArtists(playlist);
 
   // Fetch artist information for uncached artists in batches of 50
   if (artistIdsToCache.size > 0) {
@@ -152,16 +137,16 @@ async function fetchAndUpdateCachedArtists(playlistId) {
   }
 
   // call the function again to update with the newest information
-  await updateTracksWithArtistInfo(playlist);
+  await updateCachedTracksWithCachedArtists(playlist);
 };
 
 /**
  * Retrieves artist information for each track in the playlist from the Redis cache and Spotify API,
- * updates the cache accordingly, and returns a set of artist IDs that need to be cached.
+ * updates the cached track accordingly, and returns a set of artist IDs that need to be cached.
  * @param {Object} playlist - The playlist object.
  * @returns {Set} - Set of artist IDs that need to be cached.
  */
-async function updateTracksWithArtistInfo(playlist) {
+async function updateCachedTracksWithCachedArtists(playlist) {
   const artistIdsToCache = new Set();
 
   // let x = 0
@@ -170,25 +155,27 @@ async function updateTracksWithArtistInfo(playlist) {
   // let flag = false
   // Iterate through every track in the playlist
   for (const trackItem of playlist.tracks.items) {
-    const trackId = trackItem.track.id;
-    const cachedTrack = await redisClient.get(`tracks:${trackId}`);
-    const track = JSON.parse(cachedTrack);
-
+    let track = trackItem.track;
     // Iterate through every artist in the track
-    for (let j = 0; j < trackItem.track.artists.length; j++) {
+    for (let j = 0; j < track.artists.length; j++) {
       const artist = track.artists[j];
       //y++;
       // Check if the artist has the 'popularity' field
       if (!artist.popularity) {
         //flag = true;
-        const cachedArtist = await redisClient.get(`artists:${artist.id}`);
-        if (cachedArtist) {
-          track.artists[j] = JSON.parse(cachedArtist);
-        } else {
-          //z++;
-          artistIdsToCache.add(artist.id);
+        const cachedTrack = await redisClient.get(`tracks:${track.id}`);
+        track = JSON.parse(cachedTrack);
+        if (!track.artists[j].popularity) {
+          const cachedArtist = await redisClient.get(`artists:${artist.id}`);
+          if (cachedArtist) {
+            track.artists[j] = JSON.parse(cachedArtist);
+          } else {
+            //z++;
+            artistIdsToCache.add(artist.id);
+          }
         }
       }
+      redisClient.set(`tracks:${track.id}`, JSON.stringify(track));
     }
     // if (flag == true){
     //   x++;
@@ -196,7 +183,6 @@ async function updateTracksWithArtistInfo(playlist) {
     //   console.log(track)
     //   flag = false;
     // }
-    redisClient.set(`tracks:${trackId}`, JSON.stringify(track));
   }
   //console.log(x, "tracks did not have all of their artist info completed out of",playlist.tracks.items.length,)
   //console.log(z, "artists were not cached out of",y)
@@ -216,15 +202,17 @@ async function fetchAndUpdateTracksLikedStatus(playlistId) {
   
   // Iterate through every track in the playlist
   for (let trackItem of playlist.tracks.items) {
-    const trackId = trackItem.track.id;
-    const cachedTrack = await redisClient.get(`tracks:${trackId}`);
-    const track = JSON.parse(cachedTrack);
+    track = trackItem.track;
 
     // Check if the track has the 'liked' field
     if (!track.hasOwnProperty('liked')) {
       // console.log("track",track.name,"did not have a liked status field")
       // console.log(track)
-      tracksToCache.add(track);
+      const cachedTrack = await redisClient.get(`tracks:${track.id}`);
+      track = JSON.parse(cachedTrack);
+      if (!track.hasOwnProperty('liked')) {
+        tracksToCache.add(track);
+      }
     }
   }
 
@@ -260,14 +248,18 @@ async function fetchAndUpdateTracksFeatures(playlistId) {
   const tracksToCache = new Set();
 
   // Iterate through every track in the playlist
-  for (let trackItem of playlist.tracks.items) {
-    const trackId = trackItem.track.id;
-    const cachedTrack = await redisClient.get(`tracks:${trackId}`);
-    const track = JSON.parse(cachedTrack);
+  for (const trackItem of playlist.tracks.items) {
+    track = trackItem.track;
 
-    // Check if the track has the 'audio_features' field
-    if (!track.audio_features) {
-      tracksToCache.add(track);
+    // Check if the track has the 'liked' field
+    if (!track.hasOwnProperty('liked')) {
+      // console.log("track",track.name,"did not have a liked status field")
+      // console.log(track)
+      const cachedTrack = await redisClient.get(`tracks:${track.id}`);
+      track = JSON.parse(cachedTrack);
+      if (!track.hasOwnProperty('audio_features')) {
+        tracksToCache.add(track);
+      }
     }
   }
 
@@ -292,35 +284,55 @@ async function fetchAndUpdateTracksFeatures(playlistId) {
 };
 
 /**
+ * Updates the cached playlist with the cached tracks.
+ * @param {string} playlistId - The ID of the playlist.
+ */
+async function updatePlaylistWithTracks(playlistId){
+  const cachedPlaylist = await redisClient.get(`playlists:${playlistId}`);
+  const playlist = JSON.parse(cachedPlaylist);
+  let tracks = playlist.tracks.items;
+  // Iterate through every track in tracks and check if the trackId is in the Redis cache 'tracks:trackId'
+  // If the track is cached, retrieve it from the cache; otherwise, cache the track
+  for (let i = 0; i < tracks.length; i++) {
+    let track = tracks[i].track;
+    //console.log("track ", tracks[i].track.name," looking in cache")
+    if (!track.hasOwnProperty('audio_features') || !track.hasOwnProperty('liked') || !track.artists[0].hasOwnProperty('popularity')) {
+      const cachedTrack = await redisClient.get(`tracks:${track.id}`);
+      if (cachedTrack) {
+        tracks[i].track = JSON.parse(cachedTrack);
+        //console.log("track", tracks[i].track.name,"found in cache!")
+      } else {
+        // If the track is not in the cache, add it to the cache
+        //console.log("track", tracks[i].track.name,"not found in cache")
+        //x++;
+        redisClient.set(`tracks:${track.id}`, JSON.stringify(track));
+      }
+    }
+  }
+  //console.log(x,"tracks not found in cache out of", tracks.length)
+
+  playlist.tracks.items = tracks
+  // Update the cache with the complete playlist
+  redisClient.set(`playlists:${playlistId}`, JSON.stringify(playlist));
+}
+
+/**
  * Express route handler to get combined data of a playlist with a specific ID.
  */
 router.get("/getCombinedData/:id", async (req, res) => {
   const playlistId = req.params.id
 
-  await fetchAndCachePlaylistInfo(playlistId)
-  await fetchAndUpdateCachedPlaylist(playlistId);
-  await fetchAndUpdateCachedArtists(playlistId)
-  await fetchAndUpdateTracksLikedStatus(playlistId)
-  await fetchAndUpdateTracksFeatures(playlistId)
+  await fetchAndUpdatePlaylistInfo(playlistId);
+  await ensurePlaylistCompleteness(playlistId);
+  await fetchAndUpdateTracksArtistInfo(playlistId);
+  await fetchAndUpdateTracksLikedStatus(playlistId);
+  await fetchAndUpdateTracksFeatures(playlistId);
 
-  const cachedPlaylist = await redisClient.get(`playlists:${playlistId}`);
-  const playlist = JSON.parse(cachedPlaylist);
-  let tracks = playlist.tracks.items;
-  // assemble the full playlist data to send back to frontend
-  for (let i = 0; i < tracks.length; i++) {
-    const trackId = tracks[i].track.id;
-    const cachedTrack = await redisClient.get(`tracks:${trackId}`);
-    if (cachedTrack) {
-      tracks[i].track = JSON.parse(cachedTrack);
-      //console.log("track", tracks[i].track.name,"found in cache!")
-    } else {
-      console.log("track", tracks[i].track.name,"somehow not found in cache")
-    }
-  }
+  await updatePlaylistWithTracks(playlistId);
 
-  // Update the playlist object with the updated tracks
-  playlist.tracks.items = tracks;
-  return res.json(playlist);
+  const playlist = await redisClient.get(`playlists:${playlistId}`);
+  // Return the updated playlist
+  return res.json(JSON.parse(playlist));
 });
 
 function getPlaylistItems(playlistId, offset, limit) {

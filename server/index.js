@@ -1,6 +1,7 @@
 const express = require("express");
 const request = require("request");
 const dotenv = require("dotenv");
+const { createClient } = require('redis');
 
 const port = 5000;
 
@@ -13,6 +14,17 @@ var spotify_client_secret = process.env.SPOTIFY_CLIENT_SECRET;
 
 var spotify_redirect_uri = "http://localhost:3000/auth/callback";
 
+var app = express();
+
+const redisClient = createClient({ url: 'redis://127.0.0.1:6379' });
+
+redisClient.connect().then(() => {
+  const playlistRoutes = require("./routes/playlistRoutes");
+  const userRoutes = require("./routes/userRoutes");  
+  app.use("/auth/playlist", playlistRoutes);
+  app.use("/auth/user", userRoutes);
+});
+
 var generateRandomString = function (length) {
   var text = "";
   var possible =
@@ -23,14 +35,6 @@ var generateRandomString = function (length) {
   }
   return text;
 };
-
-var app = express();
-
-const playlistRoutes = require("./routes/playlistRoutes");
-const userRoutes = require("./routes/userRoutes");
-
-app.use("/auth/playlist", playlistRoutes);
-app.use("/auth/user", userRoutes);
 
 app.get("/auth/login", (req, res) => {
   var scope =
@@ -129,3 +133,6 @@ app.get("/auth/token", (req, res) => {
 app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}`);
 });
+
+module.exports = { redisClient };
+

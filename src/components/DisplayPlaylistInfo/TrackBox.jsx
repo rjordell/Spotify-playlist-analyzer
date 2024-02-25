@@ -10,28 +10,23 @@ function TrackBox({
   setDisplaySort,
   playlistItemsController,
 }) {
-  const getCombinedData = async (offset, allItems = []) => {
+  const getCombinedData = async () => {
     try {
       const response = await fetch(
-        `/auth/playlist/getCombinedData/${playlistId}?limit=100&offset=${offset}`,
+        `/auth/playlist/getCombinedData/${playlistId}`,
         {
           signal: playlistItemsController.signal,
         }
       );
       const data = await response.json();
+      console.log("TRACKBOX.JS: data from getCombinedData ", data)
       if (data.error) {
         setCombinedData(null);
         setOriginalItems(null);
       } else {
-        const updatedItems = [...allItems, ...data.items];
-        data.items = updatedItems;
-        setCombinedData(data);
+        setCombinedData(data.tracks);
         setOriginalItems(data);
-        if (data.next) {
-          getCombinedData(data.offset + 100, updatedItems);
-        } else {
-          setDisplaySort(true);
-        }
+        setDisplaySort(true);
       }
     } catch (error) {
       if (error.name === "AbortError") {
@@ -49,14 +44,14 @@ function TrackBox({
       setCombinedData(null);
       setOriginalItems(null);
       setDisplaySort(false);
-      getCombinedData(0);
+      getCombinedData();
     }
   }, [playlistId]);
 
   return (
     <div className="main-container tracks">
       {combinedData?.items.map((item) => (
-        <Track key={item.track} track={item} />
+        <Track key={item.track} track={item.track} />
       ))}
     </div>
   );

@@ -43,11 +43,11 @@ function App() {
       async function getCurrentUserProfile() {
         const response = await fetch("/auth/user/getCurrentUsersProfile");
         const json = await response.json();
-        //console.log(json);
+        console.log(json);
         setCurrentUser(json);
       }
       getCurrentUserProfile();
-      getCombinedSavedTracks(0);
+      //getCombinedSavedTracks(0);
     }
   }, [token]);
 
@@ -69,7 +69,7 @@ function App() {
         if (data.next) {
           getCombinedSavedTracks(data.offset + 50, updatedItems);
         } else {
-          console.log("finished");
+          console.log("APP.JS: finished caching liked tracks?");
         }
       }
     } catch (error) {
@@ -87,10 +87,13 @@ function App() {
   } else {
     return (
       <div className="App">
-        <LeftBoxes
-          setSelectedPlaylist={setSelectedPlaylist}
-          cancelFetches={cancelFetches}
-        />
+        {currentUser && ( 
+          <LeftBoxes
+            setSelectedPlaylist={setSelectedPlaylist}
+            cancelFetches={cancelFetches}
+            currentUser={currentUser} // Passing currentUser as a prop
+          />
+        )}
         <MainBox
           selectedPlaylist={selectedPlaylist}
           playlistItemsController={playlistItemsController}

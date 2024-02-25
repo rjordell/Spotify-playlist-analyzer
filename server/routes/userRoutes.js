@@ -1,6 +1,7 @@
 const express = require("express");
 const request = require("request");
 const router = express.Router();
+const { redisClient } = require("../index");
 
 const getLikedTracks = (offset, limit) => {
   return new Promise((resolve, reject) => {
@@ -46,14 +47,85 @@ router.get("/getCurrentUsersProfile/", (req, res) => {
   );
 });
 
-router.get("/getUsersPlaylists/:id", (req, res) => {
+router.get("/getUsersPlaylists/:id", async (req, res) => {
   const userId = req.params.id;
-  let allPlaylists = [];
-  let data = null;
+  // Check the cache for the user's playlists
+  //console.log("USERROUTES.JS: called getuserspalyslits2")
+  redisClient.get(`users:${userId}`).then((cachedData) => {
+    //console.log("inside of get");
+    if (cachedData) {
+      // If user's playlists are found in cache, return cached data
+      //console.log("USERROUTES.JS: found palyists in cache")
+      return res.json(JSON.parse(cachedData));
+    } else {
+      //console.log("USERROUTES.JS: didnt find palyists")
+      try {
+        //console.log("USERROUTES.JS: lookign thru api ")
+        // If user's playlists are not found in cache, fetch from Spotify API
+        fetchUserPlaylists(userId).then((playlists) => {
+          // Cache the fetched playlists data
+          redisClient.set(`users:${userId}`, JSON.stringify(playlists));
+          //console.log("USERROUTES.JS: retrieved from api ", redisClient)
+          //console.log("USERROUTES.JS: retrieved from api")
+          res.json(playlists);
+        });
+      } catch (error) {
+        console.error("Error fetching user's playlists:", error);
+        res.status(500).json({ error: "Error fetching user's playlists" });
+      }
+    }
+  });
+});
 
-  const fetchPlaylists = (url) => {
+router.get("/getUsersPlaylists2/:id", async (req, res) => {
+  const userId = req.params.id;
+  //console.log("inside of getUsersPlaylists2");
+  // Check the cache for the user's playlists
+  const cachedData = await redisClient.get(`users:${userId}`);
+
+  if (cachedData) {
+    // If user's playlists are found in cache, return cached data
+    //console.log("USERROUTES.JS: found palyists in cache")
+    return res.json(JSON.parse(cachedData));
+  } else {
+    //console.log("USERROUTES.JS: didnt find palyists")
+    try {
+      //console.log("USERROUTES.JS: lookign thru api ")
+      // If user's playlists are not found in cache, fetch from Spotify API
+      fetchUserPlaylists(userId).then((playlists) => {
+        // Cache the fetched playlists data
+        redisClient.set(`users:${userId}`, JSON.stringify(playlists));
+        //console.log("USERROUTES.JS: retrieved from api ", redisClient)
+        //console.log("USERROUTES.JS: retrieved from api")
+        res.json(playlists);
+      });
+    } catch (error) {
+      console.error("Error fetching user's playlists:", error);
+      res.status(500).json({ error: "Error fetching user's playlists" });
+    }
+  }
+});
+
+async function fetchUserPlaylists(userId) {
+  // Fetch the first batch of playlists
+  const playlists = await getPlaylistsFromAPI(userId, 0);
+  let offset = playlists.length;
+
+  // Check if all playlists are fetched
+  while (offset < playlists.total) {
+    // Fetch the next batch of playlists
+    const nextPlaylists = await getPlaylistsFromAPI(userId, offset);
+    playlists.items.push(...nextPlaylists.items);
+    offset += nextPlaylists.items.length;
+  }
+
+  return playlists;
+}
+
+function getPlaylistsFromAPI(userId, offset) {
+  return new Promise((resolve, reject) => {
     request.get(
-      url,
+      `https://api.spotify.com/v1/users/${userId}/playlists?limit=50&offset=${offset}`,
       {
         headers: {
           Authorization: `Bearer ${access_token}`,
@@ -61,94 +133,14 @@ router.get("/getUsersPlaylists/:id", (req, res) => {
       },
       (error, response, body) => {
         if (!error && response.statusCode === 200) {
-          const PlaylistItems = JSON.parse(body);
-          allPlaylists = allPlaylists.concat(PlaylistItems.items);
-          if (PlaylistItems.next) {
-            fetchPlaylists(PlaylistItems.next);
-          } else {
-            data.items = allPlaylists;
-            res.json(data);
-          }
+          const playlists = JSON.parse(body);
+          resolve(playlists);
         } else {
-          res.status(response.statusCode).json({ error: "Invalid playlists" });
+          reject(error);
         }
       }
     );
-  };
-
-  request.get(
-    `https://api.spotify.com/v1/users/${userId}/playlists`,
-    {
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-      },
-    },
-    (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        data = JSON.parse(body);
-        if (data.next) {
-          allPlaylists = allPlaylists.concat(data.items);
-          fetchPlaylists(data.next);
-        } else {
-          res.json(data);
-        }
-      } else {
-        res.status(response.statusCode).json({ error: "Invalid user id" });
-      }
-    }
-  );
-});
-
-router.get("/getCurrentUsersPlaylists/", (req, res) => {
-  let allPlaylists = [];
-  let data = null;
-
-  const fetchPlaylists = (url) => {
-    request.get(
-      url,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      },
-      (error, response, body) => {
-        if (!error && response.statusCode === 200) {
-          const PlaylistItems = JSON.parse(body);
-          allPlaylists = allPlaylists.concat(PlaylistItems.items);
-          if (PlaylistItems.next) {
-            fetchPlaylists(PlaylistItems.next);
-          } else {
-            data.items = allPlaylists;
-            res.json(data);
-          }
-        } else {
-          res.status(response.statusCode).json({ error: "Invalid playlists" });
-        }
-      }
-    );
-  };
-
-  request.get(
-    `https://api.spotify.com/v1/me/playlists`,
-    {
-      headers: {
-        Authorization: `Bearer ${access_token}`,
-      },
-    },
-    (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        data = JSON.parse(body);
-        if (data.next) {
-          allPlaylists = allPlaylists.concat(data.items);
-          fetchPlaylists(data.next);
-        } else {
-          res.json(data);
-        }
-      } else {
-        res.status(response.statusCode).json({ error: "Invalid user id" });
-      }
-    }
-  );
-});
+  });
+}
 
 module.exports = router;

@@ -11,6 +11,8 @@ function Playlist(props) {
       title: props.playlist.name,
       owner: props.playlist.owner.display_name,
       publicity: props.playlist.public,
+      description: props.playlist.description,
+      snapshot_id: props.playlist.snapshot_id,
     });
   };
   return (

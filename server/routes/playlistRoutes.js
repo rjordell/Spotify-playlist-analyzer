@@ -160,12 +160,14 @@ async function updateCachedTracksWithCachedArtists(playlist) {
     for (let j = 0; j < track.artists.length; j++) {
       const artist = track.artists[j];
       //y++;
-      // Check if the artist has the 'popularity' field
+      // Check if the artist field in the playlist cache has the 'popularity' field
       if (!artist.popularity) {
         //flag = true;
         const cachedTrack = await redisClient.get(`tracks:${track.id}`);
         track = JSON.parse(cachedTrack);
+        // Check if the artist field in the track cache has the 'popularity' field
         if (!track.artists[j].popularity) {
+          // Check if the artist exists in the cache
           const cachedArtist = await redisClient.get(`artists:${artist.id}`);
           if (cachedArtist) {
             track.artists[j] = JSON.parse(cachedArtist);
@@ -175,6 +177,7 @@ async function updateCachedTracksWithCachedArtists(playlist) {
           }
         }
       }
+      // Update the cached track with the artists' infos completed
       redisClient.set(`tracks:${track.id}`, JSON.stringify(track));
     }
     // if (flag == true){
@@ -204,12 +207,13 @@ async function fetchAndUpdateTracksLikedStatus(playlistId) {
   for (let trackItem of playlist.tracks.items) {
     track = trackItem.track;
 
-    // Check if the track has the 'liked' field
+    // Check if the track in the playlist cache has the 'liked' field
     if (!track.hasOwnProperty('liked')) {
       // console.log("track",track.name,"did not have a liked status field")
       // console.log(track)
       const cachedTrack = await redisClient.get(`tracks:${track.id}`);
       track = JSON.parse(cachedTrack);
+      // Check if the cached track has the 'liked' field
       if (!track.hasOwnProperty('liked')) {
         tracksToCache.add(track);
       }
@@ -230,6 +234,7 @@ async function fetchAndUpdateTracksLikedStatus(playlistId) {
       for (let i = 0; i < batch.length; i++) {
         const track = batch[i];
         track.liked = likedStatus[i];
+        // Update the cached track with the liked status
         redisClient.set(`tracks:${track.id}`, JSON.stringify(track));
       }
     }
@@ -294,7 +299,7 @@ async function updatePlaylistWithTracks(playlistId){
   // Iterate through every track in tracks and check if the trackId is in the Redis cache 'tracks:trackId'
   // If the track is cached, retrieve it from the cache; otherwise, cache the track
   for (let i = 0; i < tracks.length; i++) {
-    let track = tracks[i].track;
+    let track = tracks[i].track; // i think i could change this to const
     //console.log("track ", tracks[i].track.name," looking in cache")
     if (!track.hasOwnProperty('audio_features') || !track.hasOwnProperty('liked') || !track.artists[0].hasOwnProperty('popularity')) {
       const cachedTrack = await redisClient.get(`tracks:${track.id}`);
@@ -304,9 +309,11 @@ async function updatePlaylistWithTracks(playlistId){
       } else {
         // If the track is not in the cache, add it to the cache
         //console.log("track", tracks[i].track.name,"not found in cache")
+        //console.log("track", track,"not found in cache")
         //x++;
         redisClient.set(`tracks:${track.id}`, JSON.stringify(track));
       }
+      tracks[i].index = i
     }
   }
   //console.log(x,"tracks not found in cache out of", tracks.length)
@@ -333,6 +340,262 @@ router.get("/getCombinedData/:id", async (req, res) => {
   const playlist = await redisClient.get(`playlists:${playlistId}`);
   // Return the updated playlist
   return res.json(JSON.parse(playlist));
+});
+
+async function groupTracksByArtist(playlistId) {
+  const cachedPlaylist = await redisClient.get(`playlists:${playlistId}`);
+  const playlist = JSON.parse(cachedPlaylist);
+  const artistTrackMap = new Map();
+  const trackGroups = [];
+
+  playlist.tracks.items.forEach((item, index) => {
+    const track = item.track;
+    track.index = index;
+    let sharedGroupIndex = null;
+
+    // Check all artists of the track to find any existing group
+    track.artists.forEach(artist => {
+      if (artistTrackMap.has(artist.id)) {
+        const existingGroupIndex = artistTrackMap.get(artist.id);
+        if (sharedGroupIndex === null) {
+          sharedGroupIndex = existingGroupIndex;
+        } else if (sharedGroupIndex !== existingGroupIndex) {
+          // Merge groups if the current artist connects two groups
+          trackGroups[existingGroupIndex].tracks.forEach(track => {
+            track.artists.forEach(artist => {
+              artistTrackMap.set(artist.id, sharedGroupIndex);
+            });
+          });
+          trackGroups[sharedGroupIndex].tracks = trackGroups[sharedGroupIndex].tracks.concat(trackGroups[existingGroupIndex].tracks);
+          trackGroups[existingGroupIndex].tracks = []; // Clear the merged group
+        }
+      }
+    });
+
+    // Add track to a group or create a new group if it doesn't share any artist with existing groups
+    if (sharedGroupIndex === null) {
+      sharedGroupIndex = trackGroups.length;
+      trackGroups.push({
+        tracks: [track],
+        genresCount: new Map()
+      });
+    } else {
+      trackGroups[sharedGroupIndex].tracks.push(track);
+    }
+
+    // Update artistTrackMap
+    track.artists.forEach(artist => {
+      artistTrackMap.set(artist.id, sharedGroupIndex);
+    });
+
+    // Count genres in the current track and update genre count for the group
+    const group = trackGroups[sharedGroupIndex];
+    track.artists.forEach(artist => {
+      artist.genres.forEach(genre => {
+        if (group.genresCount.has(genre)) {
+          group.genresCount.set(genre, group.genresCount.get(genre) + 1);
+        } else {
+          group.genresCount.set(genre, 1);
+        }
+      });
+    });
+  });
+
+  // Filter out any empty groups caused by merging
+  const finalGroups = trackGroups.filter(group => group.tracks.length);
+  
+  // Shuffle tracks within each group
+  finalGroups.forEach(group => {
+    //group.genres.slice(0, 3).map(([genre, _]) => genre)
+    if (group.tracks.length > 2) {  // No point in shuffling an array with only 1 or 2 tracks in it
+      group.tracks = shuffleArray(group.tracks);
+    }
+  });
+
+  return finalGroups.map((group, index) => ({
+    artistGroupId: index,
+    tracks: group.tracks,
+    genres: Array.from(group.genresCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([genre, _]) => genre)
+  }));
+}
+
+
+
+
+// Assuming initialGroups is an array of groups, 
+// where each group is an array of tracks, and each track has artists with genres
+async function groupBySharedGenres(initialGroups) {
+  //console.log(initialGroups)
+  // Step 1: Determine the most common genres for each group
+  // let groupsWithGenres = initialGroups.map(group => {
+  //   let genreCounts = new Map();
+
+  //   group.tracks.forEach(item => {
+  //     //console.log(item)
+  //     item.artists.forEach(artist => {
+  //       artist.genres.forEach(genre => {
+  //         genreCounts.set(genre, (genreCounts.get(genre) || 0) + 1);
+  //       });
+  //     });
+  //   });
+
+  //   // Sort genres by occurrence and pick the top three
+  //   let topGenres = Array.from(genreCounts.entries())
+  //     .sort((a, b) => b[1] - a[1])
+  //     .slice(0, 3)
+  //     .map(([genre, _]) => genre);
+
+  //   return {
+  //     groupId: group.groupId,
+  //     tracks: group.tracks,
+  //     topGenres: topGenres
+  //   };
+  // });
+
+  // Step 2: Group initial groups by shared genre
+  let finalGroups = [];
+
+  initialGroups.forEach(group => {
+    //let found = false;
+    // console.log("group")
+    // console.log(group)
+    let res = {
+      groups: [group],
+      genres: group.genres
+    }
+    finalGroups.forEach(finalGroup => {
+      // console.log("finalGroup")
+      // console.log(finalGroup)
+      // Check if there is any overlap in top genres between the current group and any final group
+      const sharedGenres = res.genres.filter(genre => finalGroup.genres.includes(genre));
+      if (sharedGenres.length > 0) {
+        // Merge groups if they share at least one genre
+        res.genres = Array.from(new Set([...finalGroup.genres, ...res.genres]));
+        //console.log(finalGroup.groups)
+        res.groups = res.groups.concat(finalGroup.groups);
+        finalGroup.groups = []
+        finalGroup.genres = []
+        //found = true;
+        //break;
+      }
+    });
+
+    // If no shared genres were found with existing final groups, add as a new final group
+    finalGroups.push({
+      groupId: finalGroups.length,
+      ...res,
+    });
+    
+  });
+
+  // Step 3: Merge single-track groups into a single group
+  let singleArtistGroups = finalGroups.filter(group => group.groups.length === 1);
+  if (singleArtistGroups.length > 1) {
+    let mergedGroups = singleArtistGroups.reduce((acc, curr) => acc.concat(curr.groups), []);
+    let mergedGenres = singleArtistGroups.reduce((acc, curr) => acc.concat(curr.genres), []);
+    finalGroups = finalGroups.filter(group => group.groups.length > 1);
+    finalGroups.push({
+      groupId: finalGroups.length,
+      groups: mergedGroups,
+      genres: mergedGenres
+    });
+  }
+
+  // Optionally, refine finalGroups to remove redundancy or further process
+  finalGroups = finalGroups.filter(group => group.groups.length);
+
+  return finalGroups;
+}
+
+function shuffleArray(array) {
+  // Custom sorting function to generate random values
+  const randomSort = () => Math.random() - 0.5;
+  
+  // Use the custom sorting function to shuffle the array
+  return array.sort(randomSort);
+}
+
+function pseudorandomShuffle(arrays) {
+  // Step 1: Calculate the average length of all arrays
+  const totalLength = arrays.reduce(
+    (acc, array) => acc + Math.floor(array.length * 5),
+    0
+  );
+  //console.log(totalLength);
+
+  let spreadArrays = [];
+  arrays.forEach((array) => {
+    const sectionSize = totalLength / (array.length + 1);
+    const offset = (Math.random() - 0.5) * (sectionSize/2);
+    // console.log("sectionSize");
+    // console.log(sectionSize);
+    // console.log("offset");
+    // console.log(offset);
+    let output = new Array(totalLength).fill().map((_) => []);
+
+    let index = 0;
+    for (let i = 1; i <= array.length; i++) {
+      index += sectionSize;
+      output[Math.round(index + offset)] = array[i - 1];
+    }
+    // console.log("before");
+    // console.log(array);
+    // console.log("spread");
+    // console.log(output);
+    spreadArrays.push(output);
+    //console.log(array)
+  });
+
+  //console.log("spreadArrays")
+
+  //console.log("spreadArrays: ", spreadArrays)
+  let i = 0;
+  let finalArray = [];
+  while (i < totalLength) {
+    let res = [];
+    spreadArrays.forEach((array) => {
+      //console.log(array)
+      if (!Array.isArray(array[i])){
+        res.push(array[i]);
+      }
+    });
+    //   if (res.length > 2){
+    //       res = shuffleArray(res);
+    //   }
+    res.forEach((item) => {
+      finalArray.push(item);
+    });
+    i += 1;
+  }
+  //console.log("shuffled");
+  return finalArray;
+}
+
+router.get("/groupByArtists/:id", async (req, res) => {
+  const playlistId = req.params.id
+
+  let groups = await groupTracksByArtist(playlistId);
+
+  groups = await groupBySharedGenres(groups);
+
+  let firstShuffle = []
+  
+  groups.forEach(genreGroup => {
+    let preShuffledGroup = genreGroup.groups.map((artistGroup) => artistGroup.tracks)
+    preShuffledGroup = 
+    firstShuffle.push(pseudorandomShuffle(preShuffledGroup));
+  });
+
+  let secondShuffle = pseudorandomShuffle(firstShuffle);
+  
+  // Return the updated playlist
+  //return res.json(initialGroups);
+  return res.json(secondShuffle);
+  return res.json(shuffledGroups);
+  //return res.json(groups);
 });
 
 function getPlaylistItems(playlistId, offset, limit) {

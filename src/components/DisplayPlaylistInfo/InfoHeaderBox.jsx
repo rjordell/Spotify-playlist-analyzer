@@ -1,5 +1,6 @@
 import React from "react";
 import SortBy from "./SortBy";
+import Shuffle from "./Shuffle";
 
 function InfoHeaderBox({
   selectedPlaylist,
@@ -26,11 +27,16 @@ function InfoHeaderBox({
           </div>
         </div>
         {displaySort == true ? (
+          <>
           <SortBy
             setCombinedData={setCombinedData}
             combinedData={combinedData}
             original={original}
           />
+          <Shuffle
+            playlistId={selectedPlaylist.id}
+          />
+        </>
         ) : (
           <div>Loading tracks...</div>
         )}

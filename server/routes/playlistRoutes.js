@@ -342,15 +342,12 @@ router.get("/getCombinedData/:id", async (req, res) => {
   return res.json(JSON.parse(playlist));
 });
 
-async function groupTracksByArtist(playlistId) {
-  const cachedPlaylist = await redisClient.get(`playlists:${playlistId}`);
-  const playlist = JSON.parse(cachedPlaylist);
+async function groupTracksByArtist(playlist) {
   const artistTrackMap = new Map();
   const trackGroups = [];
 
-  playlist.tracks.items.forEach((item, index) => {
+  playlist.tracks.items.forEach((item) => {
     const track = item.track;
-    track.index = index;
     let sharedGroupIndex = null;
 
     // Check all artists of the track to find any existing group
@@ -361,13 +358,17 @@ async function groupTracksByArtist(playlistId) {
           sharedGroupIndex = existingGroupIndex;
         } else if (sharedGroupIndex !== existingGroupIndex) {
           // Merge groups if the current artist connects two groups
-          trackGroups[existingGroupIndex].tracks.forEach(track => {
-            track.artists.forEach(artist => {
+          trackGroups[existingGroupIndex].items.forEach(item => {
+            item.track.artists.forEach(artist => {
               artistTrackMap.set(artist.id, sharedGroupIndex);
             });
           });
-          trackGroups[sharedGroupIndex].tracks = trackGroups[sharedGroupIndex].tracks.concat(trackGroups[existingGroupIndex].tracks);
-          trackGroups[existingGroupIndex].tracks = []; // Clear the merged group
+          // console.log("trackGroups[existingGroupIndex]: ", trackGroups[existingGroupIndex])
+          // console.log("trackGroups[sharedGroupIndex]: ", trackGroups[sharedGroupIndex])
+          trackGroups[sharedGroupIndex].items = trackGroups[sharedGroupIndex].items.concat(trackGroups[existingGroupIndex].items);
+          trackGroups[existingGroupIndex].items = []; // Clear the merged group
+          // console.log("trackGroups[existingGroupIndex] after: ", trackGroups[existingGroupIndex])
+          // console.log("trackGroups[sharedGroupIndex] after: ", trackGroups[sharedGroupIndex])
         }
       }
     });
@@ -376,11 +377,11 @@ async function groupTracksByArtist(playlistId) {
     if (sharedGroupIndex === null) {
       sharedGroupIndex = trackGroups.length;
       trackGroups.push({
-        tracks: [track],
+        items: [item],
         genresCount: new Map()
       });
     } else {
-      trackGroups[sharedGroupIndex].tracks.push(track);
+      trackGroups[sharedGroupIndex].items.push(item);
     }
 
     // Update artistTrackMap
@@ -402,19 +403,19 @@ async function groupTracksByArtist(playlistId) {
   });
 
   // Filter out any empty groups caused by merging
-  const finalGroups = trackGroups.filter(group => group.tracks.length);
+  const finalGroups = trackGroups.filter(group => group.items.length);
   
   // Shuffle tracks within each group
   finalGroups.forEach(group => {
     //group.genres.slice(0, 3).map(([genre, _]) => genre)
-    if (group.tracks.length > 2) {  // No point in shuffling an array with only 1 or 2 tracks in it
-      group.tracks = shuffleArray(group.tracks);
+    if (group.items.length > 2) {  // No point in shuffling an array with only 1 or 2 tracks in it
+      group.items = shuffleArray(group.items);
     }
   });
 
   return finalGroups.map((group, index) => ({
     artistGroupId: index,
-    tracks: group.tracks,
+    items: group.items,
     genres: Array.from(group.genresCount)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
@@ -427,35 +428,7 @@ async function groupTracksByArtist(playlistId) {
 
 // Assuming initialGroups is an array of groups, 
 // where each group is an array of tracks, and each track has artists with genres
-async function groupBySharedGenres(initialGroups) {
-  //console.log(initialGroups)
-  // Step 1: Determine the most common genres for each group
-  // let groupsWithGenres = initialGroups.map(group => {
-  //   let genreCounts = new Map();
-
-  //   group.tracks.forEach(item => {
-  //     //console.log(item)
-  //     item.artists.forEach(artist => {
-  //       artist.genres.forEach(genre => {
-  //         genreCounts.set(genre, (genreCounts.get(genre) || 0) + 1);
-  //       });
-  //     });
-  //   });
-
-  //   // Sort genres by occurrence and pick the top three
-  //   let topGenres = Array.from(genreCounts.entries())
-  //     .sort((a, b) => b[1] - a[1])
-  //     .slice(0, 3)
-  //     .map(([genre, _]) => genre);
-
-  //   return {
-  //     groupId: group.groupId,
-  //     tracks: group.tracks,
-  //     topGenres: topGenres
-  //   };
-  // });
-
-  // Step 2: Group initial groups by shared genre
+async function groupArtistsByGenre(initialGroups) {
   let finalGroups = [];
 
   initialGroups.forEach(group => {
@@ -519,17 +492,19 @@ function shuffleArray(array) {
 }
 
 function pseudorandomShuffle(arrays) {
-  // Step 1: Calculate the average length of all arrays
-  const totalLength = arrays.reduce(
-    (acc, array) => acc + Math.floor(array.length * 5),
+  // Step 1: Calculate the total length of all arrays
+  //console.log("arrays passed into shuffle: ", arrays)
+  const totalLength = 5*arrays.reduce(
+    (acc, array) => acc + Math.floor(array.length),
     0
   );
   //console.log(totalLength);
+  arrays = shuffleArray(arrays);
 
   let spreadArrays = [];
   arrays.forEach((array) => {
     const sectionSize = totalLength / (array.length + 1);
-    const offset = (Math.random() - 0.5) * (sectionSize/2);
+    const offset = (Math.random() - 0.5) * (sectionSize);
     // console.log("sectionSize");
     // console.log(sectionSize);
     // console.log("offset");
@@ -570,32 +545,35 @@ function pseudorandomShuffle(arrays) {
     });
     i += 1;
   }
-  //console.log("shuffled");
+
   return finalArray;
 }
 
-router.get("/groupByArtists/:id", async (req, res) => {
+router.get("/shuffleTracks/:id", async (req, res) => {
   const playlistId = req.params.id
 
-  let groups = await groupTracksByArtist(playlistId);
+  const cachedPlaylist = await redisClient.get(`playlists:${playlistId}`);
+  let playlist = JSON.parse(cachedPlaylist);
 
-  groups = await groupBySharedGenres(groups);
+  let groupedTracksByArtists = await groupTracksByArtist(playlist);
 
-  let firstShuffle = []
+  //return res.json(groupedTracksByArtists);
+
+  let groupedArtistsByGenre = await groupArtistsByGenre(groupedTracksByArtists);
+  //return res.json(groupedArtistsByGenre);
+  let shuffled = []
   
-  groups.forEach(genreGroup => {
-    let preShuffledGroup = genreGroup.groups.map((artistGroup) => artistGroup.tracks)
-    preShuffledGroup = 
-    firstShuffle.push(pseudorandomShuffle(preShuffledGroup));
+  groupedArtistsByGenre.forEach(genreGroup => {
+    let preShuffledGroup = genreGroup.groups.map((artistGroup) => artistGroup.items)
+    shuffled.push(pseudorandomShuffle(preShuffledGroup));
   });
 
-  let secondShuffle = pseudorandomShuffle(firstShuffle);
-  
+  //return res.json(shuffled);
+  shuffled = pseudorandomShuffle(shuffled);
+  playlist.tracks.items = shuffled;
+  redisClient.set(`currentShuffle`, JSON.stringify(playlist));
   // Return the updated playlist
-  //return res.json(initialGroups);
-  return res.json(secondShuffle);
-  return res.json(shuffledGroups);
-  //return res.json(groups);
+  return res.json(playlist);
 });
 
 function getPlaylistItems(playlistId, offset, limit) {

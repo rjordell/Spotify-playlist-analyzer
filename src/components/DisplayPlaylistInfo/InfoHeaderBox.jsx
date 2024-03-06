@@ -34,6 +34,7 @@ function InfoHeaderBox({
             original={original}
           />
           <Shuffle
+            setCombinedData={setCombinedData}
             playlistId={selectedPlaylist.id}
           />
         </>

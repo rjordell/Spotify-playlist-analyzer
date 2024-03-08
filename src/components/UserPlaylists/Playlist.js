@@ -1,6 +1,7 @@
 import React from "react";
 
 function Playlist(props) {
+  //console.log("PLAYLIST.JS: ", props.playlist);
   const handleClick = () => {
     //console.log(props.playlist);
     props.cancelFetches();

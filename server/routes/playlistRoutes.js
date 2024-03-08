@@ -423,9 +423,6 @@ async function groupTracksByArtist(playlist) {
   }));
 }
 
-
-
-
 // Assuming initialGroups is an array of groups, 
 // where each group is an array of tracks, and each track has artists with genres
 async function groupArtistsByGenre(initialGroups) {
@@ -549,7 +546,7 @@ function pseudorandomShuffle(arrays) {
   return finalArray;
 }
 
-router.get("/shuffleTracks/:id", async (req, res) => {
+router.get("/getShuffledPlaylist/:id", async (req, res) => {
   const playlistId = req.params.id
 
   const cachedPlaylist = await redisClient.get(`playlists:${playlistId}`);
@@ -574,6 +571,55 @@ router.get("/shuffleTracks/:id", async (req, res) => {
   redisClient.set(`currentShuffle`, JSON.stringify(playlist));
   // Return the updated playlist
   return res.json(playlist);
+});
+
+async function reorderPlaylistTracks() {
+  // Retrieve the playlist tracks
+  const cachedPlaylist = await redisClient.get(`currentShuffle`);
+  let playlist = JSON.parse(cachedPlaylist);
+
+  // Reorder each track in the playlist
+  for (let i = 0; i < playlist.items.length; i++) {
+
+    // Make the request to reorder the track
+    const reorderResponse = await fetch(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        range_start: playlist.items[i].index,
+        insert_before: i,
+        range_length: 1,
+      })
+    });
+    if (!reorderResponse.ok) {
+      throw new Error('Failed to reorder playlist');
+    }
+
+    const reorderData = await reorderResponse.json();
+
+    playlist.items[i].index = i;
+    playlist.snapshot_id = reorderData.snapshot_id;
+
+    console.log(`Track ${playlist.items[i].track.name} reordered successfully.`);
+  }
+
+  redisClient.set(`playlists:${playlist.id}`, JSON.stringify(playlist));
+  console.log('Playlist reordered successfully.');
+}
+
+router.get("/shufflePlaylist/", async (req, res) => {
+  try {
+    // Call the function to reorder the playlist tracks
+    await reorderPlaylistTracks();
+
+    res.status(200).json({ message: 'Playlist shuffled successfully.' });
+  } catch (error) {
+    console.error('Error shuffling playlist:', error);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
 });
 
 function getPlaylistItems(playlistId, offset, limit) {

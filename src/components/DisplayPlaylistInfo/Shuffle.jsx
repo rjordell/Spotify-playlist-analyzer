@@ -15,7 +15,7 @@ function Shuffle({ playlistId, setCombinedData, original }) {
         console.error("Error retrieving shuffled playlist:", data.error);
       } else {
         console.log("SHUFFLE.JS: shuffled playlist ", data)
-        setCombinedData(data.tracks);
+        setCombinedData(data);
         setShuffleState("shuffled");
       }
     } catch (error) {
@@ -31,8 +31,10 @@ function Shuffle({ playlistId, setCombinedData, original }) {
       const response = await fetch("/auth/playlist/shufflePlaylist/", {
         method: "GET"
       });
+      const data = await response.json();
       if (response.ok) {
         console.log("Playlist shuffled successfully!");
+        console.log(data)
         setShuffleState("satisfactory");
       } else {
         console.error("Failed to shuffle playlist.");
@@ -58,14 +60,16 @@ function Shuffle({ playlistId, setCombinedData, original }) {
       )}
       {shuffleState === "shuffled" && (
         <>
-          <p>Shuffled playlist preview</p>
+          <h1>Shuffled playlist preview</h1>
+          <br></br>
+          <p>Do you like the shuffle?</p>
           <button onClick={commitShuffle}>
-            {isLoading ? "Committing Shuffle..." : "Commit Shuffle"}
+            {isLoading ? "Committing Shuffle..." : "Yes! Commit the shuffle"}
           </button>
           <button onClick={shufflePlaylist}>
-            {isLoading ? "Shuffling..." : "Shuffle Again"}
+            {isLoading ? "Shuffling..." : "No, shuffle again"}
           </button>
-          <button onClick={cancelShuffle}>Cancel</button>
+          <button onClick={cancelShuffle}>Exit</button>
         </>
       )}
       {shuffleState === "satisfactory" && (

@@ -24,7 +24,7 @@ function TrackBox({
         setCombinedData(null);
         setOriginalItems(null);
       } else {
-        setCombinedData(data.tracks);
+        setCombinedData(data);
         setOriginalItems(data);
         setDisplaySort(true);
       }
@@ -50,7 +50,7 @@ function TrackBox({
 
   return (
     <div className="main-container tracks">
-      {combinedData?.items.map((item) => (
+      {combinedData?.tracks.items.map((item) => (
         //console.log(combinedData),
         <Track key={item.track} track={item.track} />
       ))}

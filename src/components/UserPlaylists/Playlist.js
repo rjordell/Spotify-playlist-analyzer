@@ -8,7 +8,7 @@ function Playlist(props) {
     props.setSelectedPlaylist(props.playlist);
     props.setSelectedPlaylist({
       id: props.playlist.id,
-      coverImg: props.playlist.images[0].url,
+      coverImg: props.playlist.images[0]?.url,
       title: props.playlist.name,
       owner: props.playlist.owner.display_name,
       publicity: props.playlist.public,
@@ -20,7 +20,7 @@ function Playlist(props) {
     <div className="container playlist" onClick={handleClick}>
       <div className="imageAndTitle">
         <img
-          src={props.playlist.images[0].url}
+          src={props.playlist.images[0]?.url}
           className="coverImg playlist"
           alt=""
         />

@@ -5,7 +5,7 @@ import InfoHeaderBox from "./InfoHeaderBox";
 import "./DisplayPlaylistInfo.css";
 
 function DisplayPlaylistInfo({ selectedPlaylist, playlistItemsController }) {
-  console.log(selectedPlaylist);
+  //console.log(selectedPlaylist);
   const [combinedData, setCombinedData] = useState(null);
   const [original, setOriginalItems] = useState(null);
   const [displaySort, setDisplaySort] = useState(false);

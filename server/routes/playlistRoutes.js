@@ -575,21 +575,31 @@ router.get("/getShuffledPlaylist/:id", async (req, res) => {
 
 async function reorderPlaylistTracks() {
   // Retrieve the playlist tracks
-  const cachedPlaylist = await redisClient.get(`currentShuffle`);
+  const cachedShuffle = await redisClient.get(`currentShuffle`);
+  const shuffle = JSON.parse(cachedShuffle);
+
+  const cachedPlaylist = await redisClient.get(`playlists:${shuffle.id}`);
   let playlist = JSON.parse(cachedPlaylist);
 
-  // Reorder each track in the playlist
-  for (let i = 0; i < playlist.items.length; i++) {
+  for (let i = 0; i < playlist.tracks.items.length; i++) {
+    playlist.tracks.items[shuffle.tracks.items[i].index].index = i;
+  }
+
+  //return (playlist)
+
+  for (let i = 0; i < playlist.tracks.items.length; i++) {
+    
+    const currentIndex = playlist.tracks.items.findIndex(item => item.index === i)
 
     // Make the request to reorder the track
     const reorderResponse = await fetch(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, {
       method: 'PUT',
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${access_token}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        range_start: playlist.items[i].index,
+        range_start: currentIndex,
         insert_before: i,
         range_length: 1,
       })
@@ -598,12 +608,19 @@ async function reorderPlaylistTracks() {
       throw new Error('Failed to reorder playlist');
     }
 
+    // Remove the track from its current position in the playlist
+    const trackToReorder = playlist.tracks.items.splice(currentIndex, 1)[0];
+    
+    // Reinsert the track at the correct index
+    playlist.tracks.items.splice(i, 0, trackToReorder);
+
     const reorderData = await reorderResponse.json();
 
-    playlist.items[i].index = i;
+    playlist.tracks.items[i].index = i;
     playlist.snapshot_id = reorderData.snapshot_id;
 
-    console.log(`Track ${playlist.items[i].track.name} reordered successfully.`);
+    //console.log(`Track ${trackToReorder.track.name} reordered successfully.`);
+    
   }
 
   redisClient.set(`playlists:${playlist.id}`, JSON.stringify(playlist));
@@ -614,7 +631,8 @@ router.get("/shufflePlaylist/", async (req, res) => {
   try {
     // Call the function to reorder the playlist tracks
     await reorderPlaylistTracks();
-
+    //const temp = await reorderPlaylistTracks();
+    //return res.json(temp)
     res.status(200).json({ message: 'Playlist shuffled successfully.' });
   } catch (error) {
     console.error('Error shuffling playlist:', error);

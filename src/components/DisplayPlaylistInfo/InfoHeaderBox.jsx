@@ -21,7 +21,7 @@ function InfoHeaderBox({
           <div className="now-playing__side">
             <div className="containerHeader">{selectedPlaylist.title}</div>
             <div className="containerSubheader">
-              {selectedPlaylist.owner} • {combinedData ? combinedData.total : 0}{" "}
+              {selectedPlaylist.owner} • {combinedData ? combinedData.tracks.total : 0}{" "}
               Songs
             </div>
           </div>
@@ -40,7 +40,7 @@ function InfoHeaderBox({
           />
         </>
         ) : (
-          <div>Loading tracks...</div>
+          <div>Loading...</div>
         )}
       </div>
     </div>

@@ -60,23 +60,23 @@ function Shuffle({ playlistId, setCombinedData, original }) {
       )}
       {shuffleState === "shuffled" && (
         <>
-          <h1>Shuffled playlist preview</h1>
-          <br></br>
-          <p>Do you like the shuffle?</p>
-          <button onClick={commitShuffle}>
-            {isLoading ? "Committing Shuffle..." : "Yes! Commit the shuffle"}
-          </button>
-          <button onClick={shufflePlaylist}>
-            {isLoading ? "Shuffling..." : "No, shuffle again"}
-          </button>
-          <button onClick={cancelShuffle}>Exit</button>
+          {isLoading ? (
+            <p>Committing shuffle...</p>
+          ) : (
+            <>
+              <p>Are you satisfied with the shuffle?</p>
+              <button onClick={commitShuffle}>Yes! Commit the shuffle</button>
+              <button onClick={shufflePlaylist}>No, shuffle again</button>
+              <button onClick={cancelShuffle}>Cancel</button>
+            </>
+          )}
         </>
       )}
       {shuffleState === "satisfactory" && (
         <>
           <p>Playlist shuffled successfully!</p>
-          <button onClick={() => setShuffleState("initial")}>
-            Shuffle Playlist
+          <button onClick={shufflePlaylist}>
+            Shuffle Again
           </button>
         </>
       )}

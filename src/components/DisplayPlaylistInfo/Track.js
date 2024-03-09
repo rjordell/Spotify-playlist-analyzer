@@ -7,7 +7,7 @@ function Track({ track }) {
       <div className="container track">
         <div className="imageAndTitle">
           <img
-            src={track.album.images[0].url}
+            src={track.album.images[0]?.url}
             className="coverImg track"
             alt=""
           />

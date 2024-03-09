@@ -324,7 +324,10 @@ async function updatePlaylistWithTracks(playlistId){
 }
 
 /**
- * Express route handler to get combined data of a playlist with a specific ID.
+ * Retrieves and updates the data for a playlist.
+ *
+ * @param {string} id - The ID of the playlist.
+ * @returns {Promise<Object>} - The updated playlist data.
  */
 router.get("/getCombinedData/:id", async (req, res) => {
   const playlistId = req.params.id
@@ -342,6 +345,12 @@ router.get("/getCombinedData/:id", async (req, res) => {
   return res.json(JSON.parse(playlist));
 });
 
+/**
+ * Groups tracks in a playlist by artist.
+ *
+ * @param {Object} playlist - The playlist object containing tracks.
+ * @returns {Array} - An array of artist groups, each containing the artist group ID, the items (tracks) in the group, and the top 3 genres in the group.
+ */
 async function groupTracksByArtist(playlist) {
   const artistTrackMap = new Map();
   const trackGroups = [];
@@ -423,8 +432,12 @@ async function groupTracksByArtist(playlist) {
   }));
 }
 
-// Assuming initialGroups is an array of groups, 
-// where each group is an array of tracks, and each track has artists with genres
+/**
+ * Groups artists by genre.
+ *
+ * @param {Array} initialGroups - The initial groups of artists.
+ * @returns {Array} - The final groups of artists, grouped by genre.
+ */
 async function groupArtistsByGenre(initialGroups) {
   let finalGroups = [];
 
@@ -458,7 +471,6 @@ async function groupArtistsByGenre(initialGroups) {
       groupId: finalGroups.length,
       ...res,
     });
-    
   });
 
   // Step 3: Merge single-track groups into a single group
@@ -488,6 +500,12 @@ function shuffleArray(array) {
   return array.sort(randomSort);
 }
 
+/**
+ * Shuffles the given arrays using a pseudorandom algorithm.
+ *
+ * @param {Array<Array>} arrays - The arrays to be shuffled into each other.
+ * @returns {Array} - The shuffled array.
+ */
 function pseudorandomShuffle(arrays) {
   // Step 1: Calculate the total length of all arrays
   //console.log("arrays passed into shuffle: ", arrays)
@@ -542,10 +560,15 @@ function pseudorandomShuffle(arrays) {
     });
     i += 1;
   }
-
   return finalArray;
 }
 
+/**
+ * Retrieves a shuffled playlist based on the provided playlist ID.
+ *
+ * @param {string} id - The ID of the playlist.
+ * @returns {Object} - The shuffled playlist.
+ */
 router.get("/getShuffledPlaylist/:id", async (req, res) => {
   const playlistId = req.params.id
 
@@ -573,6 +596,12 @@ router.get("/getShuffledPlaylist/:id", async (req, res) => {
   return res.json(playlist);
 });
 
+/**
+ * Reorders the tracks in a playlist based on the current shuffle order.
+ * 
+ * @returns {Promise<void>} A promise that resolves once the playlist has been reordered successfully.
+ * @throws {Error} If there is an error reordering the playlist.
+ */
 async function reorderPlaylistTracks() {
   // Retrieve the playlist tracks
   const cachedShuffle = await redisClient.get(`currentShuffle`);
@@ -588,7 +617,10 @@ async function reorderPlaylistTracks() {
   //return (playlist)
 
   for (let i = 0; i < playlist.tracks.items.length; i++) {
-    
+    if (playlist.tracks.items[i].index == i){
+      console.log(`Track ${playlist.tracks.items[i].track.name} in correct place, skipping reorder.`);
+      continue;
+    }
     const currentIndex = playlist.tracks.items.findIndex(item => item.index === i)
 
     // Make the request to reorder the track
@@ -619,7 +651,7 @@ async function reorderPlaylistTracks() {
     playlist.tracks.items[i].index = i;
     playlist.snapshot_id = reorderData.snapshot_id;
 
-    //console.log(`Track ${trackToReorder.track.name} reordered successfully.`);
+    console.log(`Track ${trackToReorder.track.name} reordered successfully.`);
     
   }
 

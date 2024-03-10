@@ -50,9 +50,9 @@ function TrackBox({
 
   return (
     <div className="main-container tracks">
-      {combinedData?.tracks.items.map((item) => (
+      {combinedData?.tracks.items.map((item, index) => (
         //console.log(combinedData),
-        <Track key={item.track} track={item.track} />
+        <Track key={index} track={item.track} />
       ))}
     </div>
   );

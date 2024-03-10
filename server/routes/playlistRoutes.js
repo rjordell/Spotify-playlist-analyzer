@@ -351,64 +351,83 @@ router.get("/getCombinedData/:id", async (req, res) => {
  * @param {Object} playlist - The playlist object containing tracks.
  * @returns {Array} - An array of artist groups, each containing the artist group ID, the items (tracks) in the group, and the top 3 genres in the group.
  */
-async function groupTracksByArtist(playlist) {
+async function groupTracksByArtist(playlist, startIndex) {
   const artistTrackMap = new Map();
   const trackGroups = [];
+  const preStartIndexGroup = {
+    items: [],
+    genresCount: new Map(),
+  };
 
-  playlist.tracks.items.forEach((item) => {
+  console.log("startIndex: ", startIndex)
+  playlist.tracks.items.forEach((item, index) => {
     const track = item.track;
     let sharedGroupIndex = null;
 
     // Check all artists of the track to find any existing group
-    track.artists.forEach(artist => {
-      if (artistTrackMap.has(artist.id)) {
-        const existingGroupIndex = artistTrackMap.get(artist.id);
-        if (sharedGroupIndex === null) {
-          sharedGroupIndex = existingGroupIndex;
-        } else if (sharedGroupIndex !== existingGroupIndex) {
-          // Merge groups if the current artist connects two groups
-          trackGroups[existingGroupIndex].items.forEach(item => {
-            item.track.artists.forEach(artist => {
-              artistTrackMap.set(artist.id, sharedGroupIndex);
+    if (index >= startIndex) {
+      track.artists.forEach(artist => {
+        if (artistTrackMap.has(artist.id)) {
+          const existingGroupIndex = artistTrackMap.get(artist.id);
+          if (sharedGroupIndex === null) {
+            sharedGroupIndex = existingGroupIndex;
+          } else if (sharedGroupIndex !== existingGroupIndex) {
+            // Merge groups if the current artist connects two groups
+            trackGroups[existingGroupIndex].items.forEach(item => {
+              item.track.artists.forEach(artist => {
+                artistTrackMap.set(artist.id, sharedGroupIndex);
+              });
             });
-          });
-          // console.log("trackGroups[existingGroupIndex]: ", trackGroups[existingGroupIndex])
-          // console.log("trackGroups[sharedGroupIndex]: ", trackGroups[sharedGroupIndex])
-          trackGroups[sharedGroupIndex].items = trackGroups[sharedGroupIndex].items.concat(trackGroups[existingGroupIndex].items);
-          trackGroups[existingGroupIndex].items = []; // Clear the merged group
-          // console.log("trackGroups[existingGroupIndex] after: ", trackGroups[existingGroupIndex])
-          // console.log("trackGroups[sharedGroupIndex] after: ", trackGroups[sharedGroupIndex])
+            // console.log("trackGroups[existingGroupIndex]: ", trackGroups[existingGroupIndex])
+            // console.log("trackGroups[sharedGroupIndex]: ", trackGroups[sharedGroupIndex])
+            trackGroups[sharedGroupIndex].items = trackGroups[sharedGroupIndex].items.concat(trackGroups[existingGroupIndex].items);
+            trackGroups[existingGroupIndex].items = []; // Clear the merged group
+            // console.log("trackGroups[existingGroupIndex] after: ", trackGroups[existingGroupIndex])
+            // console.log("trackGroups[sharedGroupIndex] after: ", trackGroups[sharedGroupIndex])
+          }
         }
+      });
+      
+      // Add track to a group or create a new group if it doesn't share any artist with existing groups
+      if (sharedGroupIndex === null) {
+        sharedGroupIndex = trackGroups.length;
+        trackGroups.push({
+          items: [item],
+          genresCount: new Map()
+        });
+      } else {
+        trackGroups[sharedGroupIndex].items.push(item);
       }
-    });
 
-    // Add track to a group or create a new group if it doesn't share any artist with existing groups
-    if (sharedGroupIndex === null) {
-      sharedGroupIndex = trackGroups.length;
-      trackGroups.push({
-        items: [item],
-        genresCount: new Map()
+      // Update artistTrackMap
+      track.artists.forEach(artist => {
+        artistTrackMap.set(artist.id, sharedGroupIndex);
+      });
+
+      // Count genres in the current track and update genre count for the group
+      const group = trackGroups[sharedGroupIndex];
+      track.artists.forEach(artist => {
+        artist.genres.forEach(genre => {
+          if (group.genresCount.has(genre)) {
+            group.genresCount.set(genre, group.genresCount.get(genre) + 1);
+          } else {
+            group.genresCount.set(genre, 1);
+          }
+        });
       });
     } else {
-      trackGroups[sharedGroupIndex].items.push(item);
-    }
-
-    // Update artistTrackMap
-    track.artists.forEach(artist => {
-      artistTrackMap.set(artist.id, sharedGroupIndex);
-    });
-
-    // Count genres in the current track and update genre count for the group
-    const group = trackGroups[sharedGroupIndex];
-    track.artists.forEach(artist => {
-      artist.genres.forEach(genre => {
-        if (group.genresCount.has(genre)) {
-          group.genresCount.set(genre, group.genresCount.get(genre) + 1);
-        } else {
-          group.genresCount.set(genre, 1);
-        }
+      preStartIndexGroup.items.push(item);
+      // Count genres in the current track and update genre count for the special group
+      track.artists.forEach((artist) => {
+        artist.genres.forEach((genre) => {
+          if (preStartIndexGroup.genresCount.has(genre)) {
+            preStartIndexGroup.genresCount.set(genre, preStartIndexGroup.genresCount.get(genre) + 1);
+          } else {
+            preStartIndexGroup.genresCount.set(genre, 1);
+          }
+        });
       });
-    });
+    }
   });
 
   // Filter out any empty groups caused by merging
@@ -421,6 +440,9 @@ async function groupTracksByArtist(playlist) {
       group.items = shuffleArray(group.items);
     }
   });
+
+  // Push the special group for tracks before startIndex
+  finalGroups.push(preStartIndexGroup);
 
   return finalGroups.map((group, index) => ({
     artistGroupId: index,
@@ -452,7 +474,8 @@ async function groupArtistsByGenre(initialGroups) {
     finalGroups.forEach(finalGroup => {
       // console.log("finalGroup")
       // console.log(finalGroup)
-      // Check if there is any overlap in top genres between the current group and any final group
+
+      // Check if there is any overlap in genres between the current group and any final group
       const sharedGenres = res.genres.filter(genre => finalGroup.genres.includes(genre));
       if (sharedGenres.length > 0) {
         // Merge groups if they share at least one genre
@@ -501,10 +524,10 @@ function shuffleArray(array) {
 }
 
 /**
- * Shuffles the given arrays using a pseudorandom algorithm.
+ * Shuffles multiple arrays into each other evenly.
  *
  * @param {Array<Array>} arrays - The arrays to be shuffled into each other.
- * @returns {Array} - The shuffled array.
+ * @returns {Array} - The final shuffled array.
  */
 function pseudorandomShuffle(arrays) {
   // Step 1: Calculate the total length of all arrays
@@ -514,6 +537,8 @@ function pseudorandomShuffle(arrays) {
     0
   );
   //console.log(totalLength);
+
+  // Randomize the order of the arrays
   arrays = shuffleArray(arrays);
 
   let spreadArrays = [];
@@ -569,13 +594,18 @@ function pseudorandomShuffle(arrays) {
  * @param {string} id - The ID of the playlist.
  * @returns {Object} - The shuffled playlist.
  */
-router.get("/getShuffledPlaylist/:id", async (req, res) => {
+router.get("/getShuffledPlaylist/:id/:startIndex?", async (req, res) => {
   const playlistId = req.params.id
+  const startIndex = req.query.startIndex ? parseInt(req.query.startIndex) : 0;
+
+
+  console.log("req.params: ", req.params)
+  console.log("req.query: ", req.query);
 
   const cachedPlaylist = await redisClient.get(`playlists:${playlistId}`);
   let playlist = JSON.parse(cachedPlaylist);
 
-  let groupedTracksByArtists = await groupTracksByArtist(playlist);
+  let groupedTracksByArtists = await groupTracksByArtist(playlist, startIndex);
 
   //return res.json(groupedTracksByArtists);
 
@@ -597,21 +627,38 @@ router.get("/getShuffledPlaylist/:id", async (req, res) => {
 });
 
 /**
+ * Retrieves the cached shuffled playlist.
+ *
+ * @returns {Object} - The shuffled playlist.
+ */
+router.get("/getCachedShuffledPlaylist/", async (req, res) => {
+  const cachedPlaylist = await redisClient.get(`currentShuffle`);
+  let playlist = JSON.parse(cachedPlaylist);
+
+  return res.json(playlist);
+});
+
+/**
  * Reorders the tracks in a playlist based on the current shuffle order.
  * 
  * @returns {Promise<void>} A promise that resolves once the playlist has been reordered successfully.
  * @throws {Error} If there is an error reordering the playlist.
  */
 async function reorderPlaylistTracks() {
-  // Retrieve the playlist tracks
+  // Retrieve the shuffled playlist
   const cachedShuffle = await redisClient.get(`currentShuffle`);
-  const shuffle = JSON.parse(cachedShuffle);
+  let shuffledPlaylist = JSON.parse(cachedShuffle);
 
-  const cachedPlaylist = await redisClient.get(`playlists:${shuffle.id}`);
+  // Retrieve the current playlist
+  const cachedPlaylist = await redisClient.get(`playlists:${shuffledPlaylist.id}`);
   let playlist = JSON.parse(cachedPlaylist);
 
+  // Map the current playlist to the goal indices
   for (let i = 0; i < playlist.tracks.items.length; i++) {
-    playlist.tracks.items[shuffle.tracks.items[i].index].index = i;
+    const shuffledIndex = shuffledPlaylist.tracks.items.findIndex(item => item.track.id === playlist.tracks.items[i].track.id);
+    // Set the index of the current track in the playlist to the index of the corresponding track in the shuffledPlaylist
+    playlist.tracks.items[i].index = shuffledIndex;
+
   }
 
   //return (playlist)
@@ -624,7 +671,7 @@ async function reorderPlaylistTracks() {
     const currentIndex = playlist.tracks.items.findIndex(item => item.index === i)
 
     // Make the request to reorder the track
-    const reorderResponse = await fetch(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, {
+    const response = await fetch(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${access_token}`,
@@ -636,8 +683,10 @@ async function reorderPlaylistTracks() {
         range_length: 1,
       })
     });
-    if (!reorderResponse.ok) {
-      throw new Error('Failed to reorder playlist');
+    if (!response.ok) {
+      const errorMessage = await response.json();
+
+      throw new Error(`Failed to reorder playlist: ${errorMessage}`);
     }
 
     // Remove the track from its current position in the playlist
@@ -646,20 +695,19 @@ async function reorderPlaylistTracks() {
     // Reinsert the track at the correct index
     playlist.tracks.items.splice(i, 0, trackToReorder);
 
-    const reorderData = await reorderResponse.json();
+    const reorderData = await response.json();
 
     playlist.tracks.items[i].index = i;
     playlist.snapshot_id = reorderData.snapshot_id;
 
+    redisClient.set(`playlists:${playlist.id}`, JSON.stringify(playlist));
     console.log(`Track ${trackToReorder.track.name} reordered successfully.`);
-    
   }
 
-  redisClient.set(`playlists:${playlist.id}`, JSON.stringify(playlist));
   console.log('Playlist reordered successfully.');
 }
 
-router.get("/shufflePlaylist/", async (req, res) => {
+router.get("/reorderPlaylist/", async (req, res) => {
   try {
     // Call the function to reorder the playlist tracks
     await reorderPlaylistTracks();

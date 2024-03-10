@@ -3,12 +3,17 @@ import React, { useState } from "react";
 function Shuffle({ playlistId, setCombinedData, original }) {
   const [shuffleState, setShuffleState] = useState("initial");
   const [isLoading, setIsLoading] = useState(false);
+  const [startIndex, setStartIndex] = useState("");
+
+  const handleStartIndexChange = (event) => {
+    setStartIndex(event.target.value); // Update the startIndex state when input changes
+  };
 
   const shufflePlaylist = async () => {
     try {
       setIsLoading(true);
       const response = await fetch(
-        `/auth/playlist/getShuffledPlaylist/${playlistId}`,
+        `/auth/playlist/getShuffledPlaylist/${playlistId}?startIndex=${startIndex}`,
       );
       const data = await response.json();
       if (data.error) {
@@ -19,7 +24,28 @@ function Shuffle({ playlistId, setCombinedData, original }) {
         setShuffleState("shuffled");
       }
     } catch (error) {
-      console.error("Error retrieving grouped data:", error);
+      console.error("Error retrieving shuffled playlist:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getCachedShuffledPlaylist = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `/auth/playlist/getCachedShuffledPlaylist`,
+      );
+      const data = await response.json();
+      if (data.error) {
+        console.error("Error retrieving cached shuffled playlist:", data.error);
+      } else {
+        console.log("SHUFFLE.JS: cached shuffled playlist ", data)
+        setCombinedData(data);
+        setShuffleState("shuffled");
+      }
+    } catch (error) {
+      console.error("Error retrieving cached shuffled playlist:", error);
     } finally {
       setIsLoading(false);
     }
@@ -28,7 +54,7 @@ function Shuffle({ playlistId, setCombinedData, original }) {
   const commitShuffle = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("/auth/playlist/shufflePlaylist/", {
+      const response = await fetch("/auth/playlist/reorderPlaylist/", {
         method: "GET"
       });
       const data = await response.json();
@@ -56,7 +82,16 @@ function Shuffle({ playlistId, setCombinedData, original }) {
   return (
     <>
       {shuffleState === "initial" && (
-        <button onClick={shufflePlaylist}>Shuffle Playlist</button>
+        <>
+          <input
+            type="number"
+            value={startIndex}
+            onChange={handleStartIndexChange}
+            placeholder="Enter the starting index"
+          />
+          <button onClick={shufflePlaylist}>Shuffle Playlist</button>
+          <button onClick={getCachedShuffledPlaylist}>Get Cached Shuffled Playlist</button>
+        </>
       )}
       {shuffleState === "shuffled" && (
         <>
@@ -75,9 +110,7 @@ function Shuffle({ playlistId, setCombinedData, original }) {
       {shuffleState === "satisfactory" && (
         <>
           <p>Playlist shuffled successfully!</p>
-          <button onClick={shufflePlaylist}>
-            Shuffle Again
-          </button>
+          <button onClick={shufflePlaylist}>Shuffle Again</button>
         </>
       )}
     </>

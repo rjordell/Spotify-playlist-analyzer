@@ -11,7 +11,6 @@ function Track({ track }) {
             className="coverImg track"
             alt=""
           />
-
           <div className="now-playing__side">
             <div className="containerHeader">{track.name}</div>
             <div className="containerSubheader">

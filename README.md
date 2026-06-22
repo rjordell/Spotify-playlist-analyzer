@@ -69,3 +69,44 @@ npm run smart-shuffle -- --playlist <playlist-id-or-url> --artist-window 6 --gen
 `--start-index` is zero-based. For example, `--start-index 14` keeps playlist
 positions `0` through `13` in their original order and smart-shuffles position
 `14` onward.
+
+## Biweekly listen-later shuffle
+
+The listen-later automation wrapper runs the smart shuffle in `--new-only` mode.
+That means it remembers the last successful baseline, finds where the old
+playlist order ends in the current playlist, treats the tracks after that point
+as newly added, and inserts only those new tracks back into artist/genre-spaced
+positions across the whole playlist. Existing tracks keep their relative order
+as much as possible.
+
+For the first scheduled listen-later run, the wrapper uses
+`--initial-boundary-index 182`. That means positions `0` through `181` are the
+initial old-playlist baseline, and tracks from position `182` onward are treated
+as newly added and distributed through the full playlist. After that first
+successful run, the saved baseline takes over automatically.
+
+Run it manually:
+
+```powershell
+.\scripts\run-listen-later-smart-shuffle.cmd
+```
+
+Install a Windows scheduled task that runs every 2 weeks on Sunday at 22:00 (10:00 PM):
+
+```powershell
+.\scripts\install-listen-later-smart-shuffle-task.cmd
+```
+
+Remove the scheduled task:
+
+```powershell
+.\scripts\uninstall-listen-later-smart-shuffle-task.cmd
+```
+
+The scheduled command uses:
+
+```powershell
+.\scripts\smart-shuffle.cmd --playlist "https://open.spotify.com/playlist/2O12R2TLM4D1osLrBZ6rIX?si=728e4741897b4195" --new-only --initial-boundary-index 182 --apply --state-file ".spotify-shuffle-state\listen-later.json"
+```
+
+Logs are written to `.spotify-shuffle-state\logs\listen-later-smart-shuffle.log`.

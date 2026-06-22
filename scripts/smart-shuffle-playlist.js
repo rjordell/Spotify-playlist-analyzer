@@ -52,6 +52,7 @@ Options:
   --redirect-uri <uri>      Login callback URI. Default matches the old app.
   --apply                   Reorder the source playlist in place.
   --copy-name <name>        Create/resume a new private shuffled copy.
+  --new-only                Only insert tracks added since the last baseline.
   --seed <value>            Stable shuffle seed. Generated once if omitted.
   --replan                  Ignore an existing plan and compute a new one.
   --state-file <path>       Checkpoint file path.
@@ -59,6 +60,10 @@ Options:
   --artist-window <n>       Recent-track artist spacing window. Default 5.
   --genre-window <n>        Recent-track genre spacing window. Default 4.
   --start-index <n>         Preserve positions before this zero-based index.
+  --initial-boundary-index <n>
+                            With --new-only and no saved baseline, treat tracks
+                            before this zero-based index as old and tracks at
+                            or after it as newly added.
   --max-retries <n>         Retry attempts for Spotify calls. Default 5.
   --self-test               Run local algorithm checks without Spotify.
   --help                    Show this help.
@@ -73,6 +78,7 @@ function parseArgs(argv) {
     dryRun: true,
     apply: false,
     copyName: "",
+    newOnly: false,
     replan: false,
     selfTest: false,
     login: false,
@@ -111,6 +117,9 @@ function parseArgs(argv) {
         args.copyName = readValue();
         args.dryRun = false;
         break;
+      case "--new-only":
+        args.newOnly = true;
+        break;
       case "--seed":
         args.seed = readValue();
         break;
@@ -131,6 +140,9 @@ function parseArgs(argv) {
         break;
       case "--start-index":
         args.startIndex = readNonNegativeInt(arg, readValue());
+        break;
+      case "--initial-boundary-index":
+        args.initialBoundaryIndex = readNonNegativeInt(arg, readValue());
         break;
       case "--max-retries":
         args.maxRetries = readPositiveInt(arg, readValue());
@@ -710,6 +722,194 @@ function makePlan(tracks, artistsById, args) {
   };
 }
 
+function makeNewOnlyPlan(tracks, artistsById, baselineUris, args) {
+  const seed = args.seed || crypto.randomBytes(8).toString("hex");
+  const options = {
+    artistWindow: args.artistWindow || DEFAULT_OPTIONS.artistWindow,
+    genreWindow: args.genreWindow || DEFAULT_OPTIONS.genreWindow,
+  };
+  const featuredTracks = buildTrackFeatures(tracks, artistsById);
+  const startIndex = args.startIndex || DEFAULT_OPTIONS.startIndex;
+  if (startIndex > featuredTracks.length) {
+    throw new Error(`--start-index ${startIndex} is beyond the playlist length ${featuredTracks.length}.`);
+  }
+
+  const preservedPrefix = featuredTracks.slice(0, startIndex);
+  const shuffleRegion = featuredTracks.slice(startIndex);
+  const originalStats = analyzeOrder(featuredTracks);
+
+  if (!baselineUris || baselineUris.length === 0) {
+    if (args.initialBoundaryIndex !== undefined) {
+      const initialBoundaryIndex = args.initialBoundaryIndex;
+      if (initialBoundaryIndex > featuredTracks.length) {
+        throw new Error(`--initial-boundary-index ${initialBoundaryIndex} is beyond the playlist length ${featuredTracks.length}.`);
+      }
+      if (initialBoundaryIndex < startIndex) {
+        throw new Error(`--initial-boundary-index ${initialBoundaryIndex} must be greater than or equal to --start-index ${startIndex}.`);
+      }
+
+      const baseRegion = featuredTracks.slice(startIndex, initialBoundaryIndex);
+      const newTracks = featuredTracks.slice(initialBoundaryIndex);
+      const shuffledRegion = insertNewTracksIntoBase(preservedPrefix, baseRegion, newTracks, seed, options);
+      const desiredOrder = preservedPrefix.concat(shuffledRegion);
+      const previewStart = Math.max(0, Math.min(initialBoundaryIndex, desiredOrder.length) - 3);
+
+      return {
+        mode: "new-only",
+        seed,
+        options,
+        startIndex,
+        preservedPrefixCount: preservedPrefix.length,
+        generatedAt: new Date().toISOString(),
+        baselineInitialized: false,
+        usedInitialBoundary: true,
+        initialBoundaryIndex,
+        detectedBoundaryIndex: initialBoundaryIndex,
+        baselineMatchedTrackCount: initialBoundaryIndex,
+        newTrackCount: newTracks.length,
+        keptTrackCount: initialBoundaryIndex,
+        desiredUris: desiredOrder.map((track) => track.uri),
+        desiredTrackIds: desiredOrder.map((track) => track.id || track.uri),
+        preview: desiredOrder.slice(previewStart, previewStart + 30).map((track, index) => previewTrack(track, previewStart + index)),
+        originalStats,
+        shuffledStats: analyzeOrder(desiredOrder),
+        shuffledRegionStats: analyzeOrder(shuffledRegion),
+      };
+    }
+
+    return {
+      mode: "new-only",
+      seed,
+      options,
+      startIndex,
+      preservedPrefixCount: preservedPrefix.length,
+      generatedAt: new Date().toISOString(),
+      baselineInitialized: true,
+      detectedBoundaryIndex: featuredTracks.length,
+      newTrackCount: 0,
+      keptTrackCount: featuredTracks.length,
+      desiredUris: featuredTracks.map((track) => track.uri),
+      desiredTrackIds: featuredTracks.map((track) => track.id || track.uri),
+      preview: featuredTracks.slice(Math.max(0, startIndex - 3), Math.max(0, startIndex - 3) + 30).map((track, index) =>
+        previewTrack(track, Math.max(0, startIndex - 3) + index)
+      ),
+      originalStats,
+      shuffledStats: originalStats,
+      shuffledRegionStats: analyzeOrder(shuffleRegion),
+    };
+  }
+
+  const split = splitTracksByBaseline(featuredTracks, baselineUris, startIndex);
+  const baseRegion = split.existingRegion;
+  const newTracks = split.newTracks;
+
+  const shuffledRegion = insertNewTracksIntoBase(preservedPrefix, baseRegion, newTracks, seed, options);
+  const desiredOrder = preservedPrefix.concat(shuffledRegion);
+  const previewStart = Math.max(0, startIndex - 3);
+
+  return {
+    mode: "new-only",
+    seed,
+    options,
+    startIndex,
+    preservedPrefixCount: preservedPrefix.length,
+    generatedAt: new Date().toISOString(),
+    baselineInitialized: false,
+    detectedBoundaryIndex: split.detectedBoundaryIndex,
+    baselineMatchedTrackCount: split.matchedTrackCount,
+    newTrackCount: newTracks.length,
+    keptTrackCount: baseRegion.length + preservedPrefix.length,
+    desiredUris: desiredOrder.map((track) => track.uri),
+    desiredTrackIds: desiredOrder.map((track) => track.id || track.uri),
+    preview: desiredOrder.slice(previewStart, previewStart + 30).map((track, index) => previewTrack(track, previewStart + index)),
+    originalStats,
+    shuffledStats: analyzeOrder(desiredOrder),
+    shuffledRegionStats: analyzeOrder(shuffledRegion),
+  };
+}
+
+function splitTracksByBaseline(tracks, baselineUris, startIndex) {
+  let baselineCursor = 0;
+  let lastExistingIndex = startIndex - 1;
+  let matchedTrackCount = 0;
+
+  const existingRegion = [];
+  const newTracks = [];
+
+  for (let index = 0; index < startIndex; index += 1) {
+    const matchIndex = findNextBaselineMatch(baselineUris, tracks[index].uri, baselineCursor);
+    if (matchIndex !== -1) {
+      baselineCursor = matchIndex + 1;
+      matchedTrackCount += 1;
+      lastExistingIndex = index;
+    }
+  }
+
+  for (let index = startIndex; index < tracks.length; index += 1) {
+    const track = tracks[index];
+    const matchIndex = findNextBaselineMatch(baselineUris, track.uri, baselineCursor);
+    if (matchIndex === -1) {
+      newTracks.push(track);
+      continue;
+    }
+
+    existingRegion.push(track);
+    baselineCursor = matchIndex + 1;
+    matchedTrackCount += 1;
+    lastExistingIndex = index;
+  }
+
+  return {
+    existingRegion,
+    newTracks,
+    detectedBoundaryIndex: lastExistingIndex + 1,
+    matchedTrackCount,
+  };
+}
+
+function findNextBaselineMatch(baselineUris, uri, startIndex) {
+  for (let index = startIndex; index < baselineUris.length; index += 1) {
+    if (baselineUris[index] === uri) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+function getIncrementalBaselineUris(checkpoint) {
+  if (Array.isArray(checkpoint.incrementalBaselineUris) && checkpoint.incrementalBaselineUris.length > 0) {
+    return checkpoint.incrementalBaselineUris;
+  }
+  if (checkpoint.apply && checkpoint.apply.finishedAt && checkpoint.plan && Array.isArray(checkpoint.plan.desiredUris)) {
+    return checkpoint.plan.desiredUris;
+  }
+  return null;
+}
+
+function insertNewTracksIntoBase(preservedPrefix, baseRegion, newTracks, seed, options) {
+  const result = baseRegion.slice();
+  const shuffledNewTracks = newTracks.slice();
+  stableShuffle(shuffledNewTracks, seed);
+
+  for (const track of shuffledNewTracks) {
+    let bestIndex = 0;
+    let bestScore = Number.POSITIVE_INFINITY;
+    for (let index = 0; index <= result.length; index += 1) {
+      const candidateRegion = result.slice();
+      candidateRegion.splice(index, 0, track);
+      const candidateOrder = preservedPrefix.concat(candidateRegion);
+      const score = orderCost(candidateOrder, options) + stableNoise(seed, index, track.uri) * 0.1;
+      if (score < bestScore) {
+        bestScore = score;
+        bestIndex = index;
+      }
+    }
+    result.splice(bestIndex, 0, track);
+  }
+
+  return result;
+}
+
 function buildTrackFeatures(tracks, artistsById) {
   return tracks.map((track) => {
     const artistIds = (track.artists || []).map((artist) => artist.id).filter(Boolean);
@@ -1155,6 +1355,15 @@ function incrementMap(map, key) {
 function printStats(plan, checkpointPath) {
   console.log(`Checkpoint: ${checkpointPath}`);
   console.log(`Seed: ${plan.seed}`);
+  if (plan.mode === "new-only") {
+    console.log(`Mode: new-only (${plan.newTrackCount} new track${plan.newTrackCount === 1 ? "" : "s"})`);
+    console.log(`Detected old-playlist boundary index: ${plan.detectedBoundaryIndex}`);
+    if (plan.usedInitialBoundary) {
+      console.log(`No previous baseline found; using initial boundary index ${plan.initialBoundaryIndex}.`);
+    } else if (plan.baselineInitialized) {
+      console.log("No previous baseline found; current order will be saved as the baseline.");
+    }
+  }
   console.log(`Start index: ${plan.startIndex || 0} (${plan.preservedPrefixCount || 0} preserved items)`);
   console.log("Original order:");
   printOrderStats(plan.originalStats);
@@ -1213,6 +1422,47 @@ function runSelfTest() {
     artistWindow: DEFAULT_OPTIONS.artistWindow,
     genreWindow: DEFAULT_OPTIONS.genreWindow,
   });
+  const appendedTracks = [
+    {
+      sourceIndex: tracks.length,
+      type: "track",
+      id: "artist-b-new",
+      uri: "spotify:track:artist-b-new",
+      name: "Artist B New Song",
+      artists: [{ id: "artist-b", name: "Artist B" }],
+    },
+    {
+      sourceIndex: tracks.length + 1,
+      type: "track",
+      id: "artist-c-new",
+      uri: "spotify:track:artist-c-new",
+      name: "Artist C New Song",
+      artists: [{ id: "artist-c", name: "Artist C" }],
+    },
+  ];
+  const newOnlyPlan = makeNewOnlyPlan(
+    tracks.concat(appendedTracks),
+    artists,
+    tracks.map((track) => track.uri),
+    {
+      seed: "self-test-new-only",
+      startIndex: 0,
+      artistWindow: DEFAULT_OPTIONS.artistWindow,
+      genreWindow: DEFAULT_OPTIONS.genreWindow,
+    }
+  );
+  const initialBoundaryPlan = makeNewOnlyPlan(
+    tracks.concat(appendedTracks),
+    artists,
+    null,
+    {
+      seed: "self-test-initial-boundary",
+      startIndex: 0,
+      initialBoundaryIndex: tracks.length,
+      artistWindow: DEFAULT_OPTIONS.artistWindow,
+      genreWindow: DEFAULT_OPTIONS.genreWindow,
+    }
+  );
   const originalStats = analyzeOrder(featured);
   const shuffledStats = analyzeOrder(shuffled);
 
@@ -1235,6 +1485,38 @@ function runSelfTest() {
   assertSameMultiset(
     partialPlan.desiredUris.slice(4),
     tracks.slice(4).map((track) => track.uri)
+  );
+  if (newOnlyPlan.newTrackCount !== appendedTracks.length) {
+    throw new Error("Self-test failed: new-only mode did not detect the added track.");
+  }
+  if (newOnlyPlan.detectedBoundaryIndex !== tracks.length) {
+    throw new Error("Self-test failed: new-only mode did not detect the appended-track boundary.");
+  }
+  if (newOnlyPlan.desiredUris.slice(-appendedTracks.length).join("|") === appendedTracks.map((track) => track.uri).join("|")) {
+    throw new Error("Self-test failed: new-only mode left appended tracks as an end block.");
+  }
+  assertSameMultiset(
+    newOnlyPlan.desiredUris,
+    tracks.concat(appendedTracks).map((track) => track.uri)
+  );
+  if (!initialBoundaryPlan.usedInitialBoundary) {
+    throw new Error("Self-test failed: initial boundary was not used without a baseline.");
+  }
+  if (initialBoundaryPlan.baselineInitialized) {
+    throw new Error("Self-test failed: initial boundary incorrectly initialized a no-op baseline.");
+  }
+  if (initialBoundaryPlan.newTrackCount !== appendedTracks.length) {
+    throw new Error("Self-test failed: initial boundary did not detect the added tracks.");
+  }
+  if (initialBoundaryPlan.detectedBoundaryIndex !== tracks.length) {
+    throw new Error("Self-test failed: initial boundary did not keep the requested boundary.");
+  }
+  if (initialBoundaryPlan.desiredUris.slice(-appendedTracks.length).join("|") === appendedTracks.map((track) => track.uri).join("|")) {
+    throw new Error("Self-test failed: initial boundary left appended tracks as an end block.");
+  }
+  assertSameMultiset(
+    initialBoundaryPlan.desiredUris,
+    tracks.concat(appendedTracks).map((track) => track.uri)
   );
 
   console.log("Self-test passed.");
@@ -1267,7 +1549,7 @@ async function main() {
   const checkpoint = loadCheckpoint(checkpointPath, playlistId);
   const save = () => saveCheckpoint(checkpointPath, checkpoint);
 
-  if (args.replan) {
+  if (args.replan && !args.newOnly) {
     clearPlanAndFetch(checkpoint);
     save();
   }
@@ -1275,7 +1557,31 @@ async function main() {
   const client = await createSpotifyClient(options);
 
   let tracks = checkpoint.tracks;
-  if (!checkpoint.plan) {
+  if (args.newOnly) {
+    console.log("Fetching current playlist items...");
+    const current = await fetchPlaylistItemsFresh(client, playlistId, options.market);
+    tracks = current.tracks;
+    checkpoint.source = {
+      id: current.metadata.id,
+      name: current.metadata.name,
+      snapshotId: current.snapshotId,
+      total: tracks.length,
+      fetchedAt: new Date().toISOString(),
+    };
+    checkpoint.tracks = tracks;
+    save();
+
+    console.log(`Fetched ${tracks.length} playlist items.`);
+    console.log("Fetching artist genres...");
+    await ensureArtistInfo(client, tracks, checkpoint, save);
+
+    const baselineUris = getIncrementalBaselineUris(checkpoint);
+    checkpoint.plan = makeNewOnlyPlan(tracks, checkpoint.artists, baselineUris, options);
+    checkpoint.plan.sourceSnapshotId = current.snapshotId;
+    checkpoint.plan.sourceName = current.metadata.name;
+    checkpoint.apply = {};
+    save();
+  } else if (!checkpoint.plan) {
     console.log("Fetching playlist items...");
     tracks = await ensureSourceTracks(client, playlistId, checkpoint, save, options);
     console.log(`Fetched ${tracks.length} playlist items.`);
@@ -1300,6 +1606,10 @@ async function main() {
 
   if (args.apply) {
     await applyInPlace(client, playlistId, checkpoint.plan.desiredUris, checkpoint, save, options);
+    checkpoint.incrementalBaselineUris = checkpoint.plan.desiredUris;
+    checkpoint.incrementalBaselineUpdatedAt = new Date().toISOString();
+    checkpoint.incrementalBaselineSnapshotId = checkpoint.apply.snapshotId || null;
+    save();
     return;
   }
 

@@ -10,7 +10,13 @@ set "LOG_FILE=%LOG_DIR%\listen-later-smart-shuffle.log"
 if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
 
 echo [%DATE% %TIME%] Starting listen-later smart shuffle >> "%LOG_FILE%"
+pushd "%ROOT%" >nul
+if errorlevel 1 (
+  echo [%DATE% %TIME%] Failed to enter repo root "%ROOT%" >> "%LOG_FILE%"
+  exit /b 1
+)
 call "%~dp0smart-shuffle.cmd" --playlist "%PLAYLIST%" --new-only --initial-boundary-index 182 --apply --state-file "%STATE_FILE%" >> "%LOG_FILE%" 2>&1
 set "EXIT_CODE=%ERRORLEVEL%"
+popd >nul
 echo [%DATE% %TIME%] Finished with exit code %EXIT_CODE% >> "%LOG_FILE%"
 exit /b %EXIT_CODE%
